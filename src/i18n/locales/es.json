@@ -1,0 +1,9 @@
+{
+  "app": {
+    "title": "Almenara · Mapa 3D",
+    "subtitle": "Diorama low-poly interactivo"
+  },
+  "hud": {
+    "resetView": "Volver a la vista inicial"
+  }
+}

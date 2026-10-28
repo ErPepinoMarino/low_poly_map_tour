@@ -1,0 +1,9 @@
+{
+  "app": {
+    "title": "Almenara · 3D Map",
+    "subtitle": "Interactive low-poly diorama"
+  },
+  "hud": {
+    "resetView": "Back to default view"
+  }
+}
