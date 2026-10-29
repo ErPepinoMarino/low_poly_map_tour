@@ -31,7 +31,9 @@ import {
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const DEM = path.join(ROOT, 'data', 'raw', 'almenara_mdt05.tif');
 const LANDCOVER = path.join(ROOT, 'data', 'raw', 'landcover.json');
-const OUT = path.join(ROOT, 'public', 'models', 'terrain.glb');
+// La base procedural va a generated/ (se importa a Blender para editarla).
+// El terreno FINAL (decimado/editado en Blender) se guarda en public/models/terrain.glb.
+const OUT = path.join(ROOT, 'public', 'models', 'generated', 'terrain.glb');
 
 // Box blur separable sobre una rejilla RGB (row-major). Suaviza las transiciones
 // entre zonas para un aspecto orgánico, sin bordes duros.

@@ -27,7 +27,9 @@ Plan.md
 # Datos crudos (regenerables con scripts/fetch_dem.mjs) — solo el directorio raíz
 /data/
 
-# Assets generados por scripts (regenerables; se commitean en el bake definitivo)
-public/models/terrain.glb
+# Assets generados por scripts (base para editar en Blender; regenerables)
+public/models/generated/
 public/models/streets.glb
 public/models/pois.glb
+
+# El terreno FINAL (public/models/terrain.glb) se commitea: es editado a mano en Blender.
