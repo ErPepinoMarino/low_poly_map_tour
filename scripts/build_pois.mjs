@@ -1,6 +1,6 @@
-// Genera cubos de referencia en la posición de cada POI (GLB).
-// Sirven para ver dónde están los POIs y evitar colisiones al redistribuir
-// calles y edificios, tanto en la app como en Blender.
+// Genera un cubo de referencia SEPARADO por cada POI (GLB).
+// Cada cubo es un objeto/nodo con el nombre del POI (id), para importar a Blender
+// como objetos independientes y sustituirlos luego por el modelo real.
 //
 // Uso: node scripts/build_pois.mjs
 // Entrada: src/data/pois.json + data/raw/almenara_mdt05.tif
@@ -26,35 +26,33 @@ const dem = await loadDem(DEM);
 const drape = makeDrape(dem, EXAGGERATION, QUANTIZE_STEP);
 const pois = JSON.parse(await readFile(POIS, 'utf8'));
 
-const positions = [];
-const indices = [];
-const colors = [];
-let base = 0;
+const document = new Document();
+const buffer = document.createBuffer();
+const scene = document.createScene();
 
 for (const poi of pois) {
   const { x, z } = toLocalMeters(poi.lon, poi.lat);
   const y = drape(x, z);
-  addBox(positions, indices, colors, base, x, y + CUBE_SIZE / 2, z, CUBE_SIZE / 2, AMBER);
-  base += 8;
-  console.log(`  ${poi.name}: (${x.toFixed(0)}, ${z.toFixed(0)})`);
-}
 
-const document = new Document();
-const buffer = document.createBuffer();
-const pos = document.createAccessor('POSITION').setType('VEC3').setArray(new Float32Array(positions)).setBuffer(buffer);
-const idx = document.createAccessor('INDICES').setType('SCALAR').setArray(new Uint32Array(indices)).setBuffer(buffer);
-const col = document.createAccessor('COLOR_0').setType('VEC3').setArray(new Float32Array(colors)).setBuffer(buffer);
-const primitive = document
-  .createPrimitive()
-  .setAttribute('POSITION', pos)
-  .setAttribute('COLOR_0', col)
-  .setIndices(idx);
-document.createScene().addChild(document.createNode('pois').setMesh(document.createMesh('pois').addPrimitive(primitive)));
+  const positions = [];
+  const indices = [];
+  const colors = [];
+  addBox(positions, indices, colors, 0, x, y + CUBE_SIZE / 2, z, CUBE_SIZE / 2, AMBER);
+
+  const pos = document.createAccessor('POSITION').setType('VEC3').setArray(new Float32Array(positions)).setBuffer(buffer);
+  const idx = document.createAccessor('INDICES').setType('SCALAR').setArray(new Uint32Array(indices)).setBuffer(buffer);
+  const col = document.createAccessor('COLOR_0').setType('VEC3').setArray(new Float32Array(colors)).setBuffer(buffer);
+  const primitive = document.createPrimitive().setAttribute('POSITION', pos).setAttribute('COLOR_0', col).setIndices(idx);
+  const mesh = document.createMesh(poi.id).addPrimitive(primitive);
+  scene.addChild(document.createNode(poi.id).setMesh(mesh));
+
+  console.log(`  ${poi.id}: (${x.toFixed(0)}, ${z.toFixed(0)})`);
+}
 
 await mkdir(path.dirname(OUT), { recursive: true });
 const io = new NodeIO();
 await io.write(OUT, document);
-console.log(`✓ ${pois.length} cubos → ${OUT}`);
+console.log(`✓ ${pois.length} objetos (uno por POI) → ${OUT}`);
 
 function addBox(positions, indices, colors, base, cx, cy, cz, half, color) {
   const x0 = cx - half;
