@@ -19,3 +19,6 @@ export const STREET_OFFSET = 1; // elevación extra para evitar z-fighting sobre
 // Coloreado del terreno (vertex colors por cobertura de suelo).
 export const COLOR_BLUR_RADIUS = 3; // células de difuminado (suaviza las transiciones de color)
 export const COLOR_BLUR_PASSES = 2; // pasadas de blur
+
+// Grano (ruido sutil): tamaño en metros de una "loseta" de ruido en las UVs.
+export const NOISE_TILE = 40;

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { PALETTE } from '../data/scene-config';
+import { getNoiseTexture } from '../lib/noiseTexture';
 
 // Calles de referencia (generadas por scripts/build_streets.mjs).
 const STREETS_URL = `${import.meta.env.BASE_URL}models/streets.glb`;
@@ -14,6 +15,7 @@ export default function Streets() {
       color: PALETTE.road,
       flatShading: true,
       side: THREE.DoubleSide,
+      map: getNoiseTexture(),
     });
     scene.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {

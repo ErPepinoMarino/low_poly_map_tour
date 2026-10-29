@@ -25,6 +25,7 @@ import {
   QUANTIZE_STEP,
   COLOR_BLUR_RADIUS,
   COLOR_BLUR_PASSES,
+  NOISE_TILE,
 } from './lib/config.mjs';
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -102,11 +103,13 @@ const nz = Math.max(2, Math.round((zMax - zMin) / RESOLUTION));
 console.log(`Rejilla: ${nx}×${nz} celdas`);
 
 const positions = [];
+const uvs = [];
 for (let iz = 0; iz <= nz; iz++) {
   const z = zMin + iz * RESOLUTION;
   for (let ix = 0; ix <= nx; ix++) {
     const x = xMin + ix * RESOLUTION;
     positions.push(x, drape(x, z), z);
+    uvs.push(x / NOISE_TILE, z / NOISE_TILE);
   }
 }
 
@@ -156,8 +159,14 @@ const buffer = document.createBuffer();
 const pos = document.createAccessor('POSITION').setType('VEC3').setArray(new Float32Array(positions)).setBuffer(buffer);
 const idx = document.createAccessor('INDICES').setType('SCALAR').setArray(new Uint32Array(indices)).setBuffer(buffer);
 const col = document.createAccessor('COLOR_0').setType('VEC3').setArray(new Float32Array(colors)).setBuffer(buffer);
+const uv = document.createAccessor('TEXCOORD_0').setType('VEC2').setArray(new Float32Array(uvs)).setBuffer(buffer);
 
-const primitive = document.createPrimitive().setAttribute('POSITION', pos).setAttribute('COLOR_0', col).setIndices(idx);
+const primitive = document
+  .createPrimitive()
+  .setAttribute('POSITION', pos)
+  .setAttribute('COLOR_0', col)
+  .setAttribute('TEXCOORD_0', uv)
+  .setIndices(idx);
 document.createScene().addChild(document.createNode('terrain').setMesh(document.createMesh('terrain').addPrimitive(primitive)));
 
 await mkdir(path.dirname(OUT), { recursive: true });
