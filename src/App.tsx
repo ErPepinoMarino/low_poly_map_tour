@@ -6,7 +6,7 @@ import Overlay from './ui/Overlay';
 export default function App() {
   return (
     <>
-      <Canvas camera={{ position: [0, 2400, -2600], fov: 45, near: 1, far: 20000 }} dpr={[1, 2]}>
+      <Canvas camera={{ position: [0, 2400, 2600], fov: 45, near: 1, far: 20000 }} dpr={[1, 2]}>
         <Scene />
         <OrbitControls
           enableDamping
