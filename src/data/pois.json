@@ -1,0 +1,72 @@
+[
+  {
+    "id": "torre-oeste",
+    "name": "Torre oeste del castillo",
+    "nameEn": "West tower of the castle",
+    "lat": 39.75733,
+    "lon": -0.22299,
+    "note": "revisar — Torre de l'Agüelet (OSM), ¿torre oeste o vigía aparte?"
+  },
+  { "id": "castillo", "name": "Castillo", "nameEn": "Castle", "lat": 39.75685, "lon": -0.2203 },
+  {
+    "id": "torre-este",
+    "name": "Torre este del castillo",
+    "nameEn": "East tower of the castle",
+    "lat": 39.75656,
+    "lon": -0.21974,
+    "note": "revisar — nido de ametralladoras (OSM), ¿o torre este?"
+  },
+  {
+    "id": "paseo-castillo",
+    "name": "Paseo del castillo",
+    "nameEn": "Castle promenade",
+    "lat": 39.7562,
+    "lon": -0.2208,
+    "note": "revisar — posición estimada (no está en OSM)"
+  },
+  { "id": "ceip-ereta", "name": "CEIP l'Ereta", "nameEn": "CEIP l'Ereta", "lat": 39.75436, "lon": -0.22204 },
+  {
+    "id": "parroquia",
+    "name": "Parroquia de los Santos Juanes",
+    "nameEn": "Parish of Santos Juanes",
+    "lat": 39.75339,
+    "lon": -0.2251
+  },
+  {
+    "id": "mercado",
+    "name": "Mercado municipal",
+    "nameEn": "Municipal market",
+    "lat": 39.7528,
+    "lon": -0.22691
+  },
+  {
+    "id": "centro-salud",
+    "name": "Centro de Salud",
+    "nameEn": "Health center",
+    "lat": 39.75101,
+    "lon": -0.22572
+  },
+  {
+    "id": "ayuntamiento",
+    "name": "Ayuntamiento",
+    "nameEn": "Town hall",
+    "lat": 39.7515,
+    "lon": -0.22328
+  },
+  {
+    "id": "polideportivo",
+    "name": "Polideportivo",
+    "nameEn": "Sports center",
+    "lat": 39.75226,
+    "lon": -0.22835,
+    "note": "revisar — Pabelló Municipal d'Eports (hay 3 zonas deportivas)"
+  },
+  { "id": "ies-almenara", "name": "IES Almenara", "nameEn": "IES Almenara", "lat": 39.75196, "lon": -0.23084 },
+  {
+    "id": "estacion-tren",
+    "name": "Estación de tren",
+    "nameEn": "Train station",
+    "lat": 39.74876,
+    "lon": -0.21843
+  }
+]
