@@ -2,24 +2,24 @@ import { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { getNoiseTexture } from '../lib/noiseTexture';
+import { PALETTE } from '../data/scene-config';
 
-// Terreno horneado (generado por scripts/build_terrain.mjs).
-// BASE_URL hace que funcione tanto en dev como en GitHub Pages (base relativa).
+// Terreno (editado en Blender y recoloreado por scripts/colorize_terrain.mjs).
 const TERRAIN_URL = `${import.meta.env.BASE_URL}models/terrain.glb`;
 
 export default function Terrain() {
   const { scene } = useGLTF(TERRAIN_URL);
 
   useEffect(() => {
-    // El color viene de los vertex colors (COLOR_0) + grano sutil (ruido).
-    const material = new THREE.MeshStandardMaterial({
-      vertexColors: true,
-      flatShading: true,
-      map: getNoiseTexture(),
-    });
+    const noise = getNoiseTexture();
     scene.traverse((obj) => {
       if ((obj as THREE.Mesh).isMesh) {
-        (obj as THREE.Mesh).material = material;
+        const mesh = obj as THREE.Mesh;
+        // Si el GLB trae vertex colors los usamos; si no, color plano (nunca negro).
+        const hasColors = mesh.geometry.getAttribute('color') !== undefined;
+        mesh.material = hasColors
+          ? new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, map: noise })
+          : new THREE.MeshStandardMaterial({ color: PALETTE.vegetation, flatShading: true, map: noise });
       }
     });
   }, [scene]);
