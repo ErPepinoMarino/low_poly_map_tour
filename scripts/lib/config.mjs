@@ -15,3 +15,7 @@ export const QUANTIZE_STEP = 3; // metros de "terraza" (0 = sin terrazas)
 
 export const STREET_WIDTH = 2; // ancho de las cintas de referencia (m)
 export const STREET_OFFSET = 1; // elevación extra para evitar z-fighting sobre el terreno (m)
+
+// Coloreado del terreno (vertex colors por cobertura de suelo).
+export const COLOR_BLUR_RADIUS = 3; // células de difuminado (suaviza las transiciones de color)
+export const COLOR_BLUR_PASSES = 2; // pasadas de blur

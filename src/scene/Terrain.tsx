@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { PALETTE } from '../data/scene-config';
 
 // Terreno horneado (generado por scripts/build_terrain.mjs).
 // BASE_URL hace que funcione tanto en dev como en GitHub Pages (base relativa).
@@ -11,9 +10,9 @@ export default function Terrain() {
   const { scene } = useGLTF(TERRAIN_URL);
 
   useEffect(() => {
-    // El GLB no lleva material; lo asignamos aquí (flat shading = look low-poly).
+    // El color viene de los vertex colors horneados en el GLB (COLOR_0).
     const material = new THREE.MeshStandardMaterial({
-      color: PALETTE.vegetation,
+      vertexColors: true,
       flatShading: true,
     });
     scene.traverse((obj) => {
