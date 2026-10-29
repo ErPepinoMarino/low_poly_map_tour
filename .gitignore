@@ -23,3 +23,9 @@ Thumbs.db
 
 # Documento de planificación (privado — no publicar)
 Plan.md
+
+# Datos crudos (regenerables con scripts/fetch_dem.mjs)
+data/
+
+# Assets generados por scripts (regenerables; se commitean en el bake definitivo)
+public/models/terrain.glb
