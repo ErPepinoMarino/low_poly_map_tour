@@ -30,3 +30,4 @@ data/
 # Assets generados por scripts (regenerables; se commitean en el bake definitivo)
 public/models/terrain.glb
 public/models/streets.glb
+public/models/pois.glb
