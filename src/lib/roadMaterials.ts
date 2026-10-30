@@ -45,6 +45,15 @@ vec2 roadVoronoi(vec2 p) {
   }
   return vec2(sqrt(f1), sqrt(f2));
 }
+// Proyección triplanar: según la normal de la cara, proyecta en el plano adecuado,
+// evitando el estiramiento en los laterales (caras verticales).
+vec2 roadTriplanar(vec3 p) {
+  vec3 n = normalize(cross(dFdx(p), dFdy(p)));
+  vec3 a = abs(n);
+  if (a.x >= a.y && a.x >= a.z) return p.zy;
+  if (a.y >= a.z) return p.xz;
+  return p.xy;
+}
 `;
 
 // Patrones en espacio de MUNDO (sin UVs), con varying propio vRoadWorldPos.
@@ -53,13 +62,13 @@ const PATTERNS: Record<string, string> = {
   // Asfalto: ruido suave fino.
   asphalt: `
       {
-        float n = roadNoise(vRoadWorldPos.xz * 4.0);
+        float n = roadNoise(roadTriplanar(vRoadWorldPos) * 4.0);
         diffuseColor.rgb *= 0.92 + 0.08 * n;
       }`,
   // Adoquines: Voronoi isotrópico (indiferente a la dirección) con juntas.
   cobble: `
       {
-        vec2 v = roadVoronoi(vRoadWorldPos.xz * 1.0);
+        vec2 v = roadVoronoi(roadTriplanar(vRoadWorldPos) * 1.0);
         float edge = v.y - v.x; // 0 en la junta, mayor en el centro de la celda
         float joint = 1.0 - smoothstep(0.0, 0.05, edge);
         diffuseColor.rgb *= mix(1.0, 0.5, joint);
@@ -67,7 +76,7 @@ const PATTERNS: Record<string, string> = {
   // Balasto (vía): ruido fino de grava.
   ballast: `
       {
-        float n = roadNoise(vRoadWorldPos.xz * 2.0);
+        float n = roadNoise(roadTriplanar(vRoadWorldPos) * 2.0);
         diffuseColor.rgb *= 0.85 + 0.15 * n;
       }`,
 };
