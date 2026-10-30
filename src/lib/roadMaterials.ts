@@ -53,13 +53,13 @@ const PATTERNS: Record<string, string> = {
   // Asfalto: ruido suave fino.
   asphalt: `
       {
-        float n = roadNoise(vRoadWorldPos.xz * 1.0);
+        float n = roadNoise(vRoadWorldPos.xz * 4.0);
         diffuseColor.rgb *= 0.92 + 0.08 * n;
       }`,
   // Adoquines: Voronoi isotrópico (indiferente a la dirección) con juntas.
   cobble: `
       {
-        vec2 v = roadVoronoi(vRoadWorldPos.xz * 0.25);
+        vec2 v = roadVoronoi(vRoadWorldPos.xz * 1.0);
         float edge = v.y - v.x; // 0 en la junta, mayor en el centro de la celda
         float joint = 1.0 - smoothstep(0.0, 0.05, edge);
         diffuseColor.rgb *= mix(1.0, 0.5, joint);
