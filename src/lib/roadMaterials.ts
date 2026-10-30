@@ -1,43 +1,74 @@
 import * as THREE from 'three';
 
-// Color base (paleta cozy) + patrón procedural por tipo de vía, identificado por
-// el nombre del material que asignaste en Blender.
+// Color base (paleta cozy) + patrón procedural por tipo de vía (nombre del material en Blender).
 const ROAD_TYPES: Record<string, { color: string; pattern: string }> = {
   Carretera: { color: '#5B6066', pattern: 'asphalt' },
   Calle: { color: '#7A7468', pattern: 'cobble' },
   Via: { color: '#6B625A', pattern: 'ballast' },
 };
 
-// Patrones en espacio de MUNDO (las vías no tienen UVs), con un varying propio.
-// Escala exagerada a propósito (efecto maqueta): baldosas/grava más grandes de lo
-// real para que se lean a la distancia del diorama. Ajusta los multiplicadores.
+// Funciones auxiliares GLSL (se inyectan antes de main).
+const HELPERS = `
+float roadHash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+vec2 roadHash2(vec2 p) {
+  return vec2(
+    fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453),
+    fract(sin(dot(p, vec2(269.5, 183.3))) * 43758.5453)
+  );
+}
+float roadNoise(vec2 p) {
+  vec2 ip = floor(p);
+  vec2 fp = fract(p);
+  vec2 u = fp * fp * (3.0 - 2.0 * fp);
+  return mix(
+    mix(roadHash(ip), roadHash(ip + vec2(1.0, 0.0)), u.x),
+    mix(roadHash(ip + vec2(0.0, 1.0)), roadHash(ip + vec2(1.0, 1.0)), u.x),
+    u.y
+  );
+}
+vec2 roadVoronoi(vec2 p) {
+  vec2 ip = floor(p);
+  vec2 fp = fract(p);
+  float f1 = 8.0;
+  float f2 = 8.0;
+  for (int y = -1; y <= 1; y++) {
+    for (int x = -1; x <= 1; x++) {
+      vec2 g = vec2(float(x), float(y));
+      vec2 o = roadHash2(ip + g);
+      vec2 d = g + o - fp;
+      float dist = dot(d, d);
+      if (dist < f1) { f2 = f1; f1 = dist; }
+      else if (dist < f2) { f2 = dist; }
+    }
+  }
+  return vec2(sqrt(f1), sqrt(f2));
+}
+`;
+
+// Patrones en espacio de MUNDO (sin UVs), con varying propio vRoadWorldPos.
+// Escala en metros: multiplica la frecuencia para afinar el tamaño.
 const PATTERNS: Record<string, string> = {
-  // Asfalto: grano visible.
+  // Asfalto: ruido suave fino.
   asphalt: `
       {
-        vec2 p = vRoadWorldPos.xz * 0.125;
-        float n = fract(sin(dot(floor(p), vec2(127.1, 311.7))) * 43758.5453);
-        diffuseColor.rgb *= 0.82 + 0.18 * n;
+        float n = roadNoise(vRoadWorldPos.xz * 1.0);
+        diffuseColor.rgb *= 0.92 + 0.08 * n;
       }`,
-  // Adoquines: baldosas de 6 m con juntas oscuras y variación por piedra.
+  // Adoquines: Voronoi isotrópico (indiferente a la dirección) con juntas.
   cobble: `
       {
-        vec2 p = vRoadWorldPos.xz * 0.1667;
-        vec2 id = floor(p);
-        vec2 f = fract(p);
-        vec2 g = min(f, 1.0 - f);
-        float d = min(g.x, g.y);
-        float joint = 1.0 - smoothstep(0.0, 0.06, d);
-        float h = fract(sin(dot(id, vec2(127.1, 311.7))) * 43758.5453);
-        float shade = 0.78 + 0.22 * h;
-        diffuseColor.rgb *= mix(1.0, 0.4, joint) * shade;
+        vec2 v = roadVoronoi(vRoadWorldPos.xz * 0.25);
+        float edge = v.y - v.x; // 0 en la junta, mayor en el centro de la celda
+        float joint = 1.0 - smoothstep(0.0, 0.05, edge);
+        diffuseColor.rgb *= mix(1.0, 0.5, joint);
       }`,
-  // Balasto (vía): grava visible. (Los raíles/traviesas necesitarán UVs a lo largo de la vía.)
+  // Balasto (vía): ruido fino de grava.
   ballast: `
       {
-        vec2 p = vRoadWorldPos.xz * 0.33;
-        float n = fract(sin(dot(floor(p), vec2(127.1, 311.7))) * 43758.5453);
-        diffuseColor.rgb *= 0.75 + 0.25 * n;
+        float n = roadNoise(vRoadWorldPos.xz * 2.0);
+        diffuseColor.rgb *= 0.85 + 0.15 * n;
       }`,
 };
 
@@ -59,18 +90,21 @@ function applyPattern(material: THREE.MeshStandardMaterial, name: string) {
       '#include <worldpos_vertex>',
       '#include <worldpos_vertex>\nvRoadWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;',
     );
+    // Funciones auxiliares antes de main.
+    shader.fragmentShader = shader.fragmentShader.replace(
+      'void main() {',
+      `${HELPERS}void main() {`,
+    );
     // Patrón.
     shader.fragmentShader = shader.fragmentShader.replace(
       'vec4 diffuseColor = vec4( diffuse, opacity );',
       `vec4 diffuseColor = vec4( diffuse, opacity );${code}`,
     );
   };
-  // Fuerza un programa único y su recompilación con el patrón.
   material.customProgramCacheKey = () => `road-${name}`;
   material.needsUpdate = true;
 }
 
-// Recorre la escena cargada y aplica color + patrón a los materiales de vía.
 export function setupRoadMaterials(scene: THREE.Object3D) {
   scene.traverse((obj) => {
     const mesh = obj as THREE.Mesh;
