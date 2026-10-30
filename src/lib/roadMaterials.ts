@@ -8,44 +8,45 @@ const ROAD_TYPES: Record<string, { color: string; pattern: string }> = {
   Via: { color: '#6B625A', pattern: 'ballast' },
 };
 
-// Patrones en espacio de MUNDO (las vías no tienen UVs).
-// Usan un varying propio (vRoadWorldPos), porque vWorldPosition no está
-// disponible en materiales sin envmap/shadowmap.
+// Patrones en espacio de MUNDO (las vías no tienen UVs), con un varying propio.
+// Escala exagerada a propósito (efecto maqueta): baldosas/grava más grandes de lo
+// real para que se lean a la distancia del diorama. Ajusta los multiplicadores.
 const PATTERNS: Record<string, string> = {
-  // Asfalto: ruido sutil.
+  // Asfalto: grano visible.
   asphalt: `
       {
-        vec2 p = vRoadWorldPos.xz * 0.25;
+        vec2 p = vRoadWorldPos.xz * 0.125;
         float n = fract(sin(dot(floor(p), vec2(127.1, 311.7))) * 43758.5453);
-        diffuseColor.rgb *= 0.95 + 0.05 * n;
+        diffuseColor.rgb *= 0.82 + 0.18 * n;
       }`,
-  // Adoquines: rejilla con juntas y variación por piedra.
+  // Adoquines: baldosas de 6 m con juntas oscuras y variación por piedra.
   cobble: `
       {
-        vec2 p = vRoadWorldPos.xz * 0.4;
+        vec2 p = vRoadWorldPos.xz * 0.1667;
         vec2 id = floor(p);
-        vec2 f = fract(p) - 0.5;
+        vec2 f = fract(p);
+        vec2 g = min(f, 1.0 - f);
+        float d = min(g.x, g.y);
+        float joint = 1.0 - smoothstep(0.0, 0.06, d);
         float h = fract(sin(dot(id, vec2(127.1, 311.7))) * 43758.5453);
-        float d = length(f);
-        float stone = smoothstep(0.42, 0.5, d);
-        float shade = 0.9 + 0.1 * h;
-        diffuseColor.rgb *= mix(0.75, 1.0, stone) * shade;
+        float shade = 0.78 + 0.22 * h;
+        diffuseColor.rgb *= mix(1.0, 0.4, joint) * shade;
       }`,
-  // Balasto (vía): grava con ruido. (Los raíles/traviesas necesitarán UVs a lo largo de la vía.)
+  // Balasto (vía): grava visible. (Los raíles/traviesas necesitarán UVs a lo largo de la vía.)
   ballast: `
       {
-        vec2 p = vRoadWorldPos.xz * 0.5;
+        vec2 p = vRoadWorldPos.xz * 0.33;
         float n = fract(sin(dot(floor(p), vec2(127.1, 311.7))) * 43758.5453);
-        diffuseColor.rgb *= 0.88 + 0.12 * n;
+        diffuseColor.rgb *= 0.75 + 0.25 * n;
       }`,
 };
 
-function applyPattern(material: THREE.MeshStandardMaterial, pattern: string) {
-  const code = PATTERNS[pattern];
+function applyPattern(material: THREE.MeshStandardMaterial, name: string) {
+  const code = PATTERNS[name];
   if (!code) return;
 
   material.onBeforeCompile = (shader) => {
-    // Declarar el varying en ambos shaders.
+    // Varying propio (vWorldPosition no existe sin envmap/shadowmap).
     shader.vertexShader = shader.vertexShader.replace(
       '#include <common>',
       '#include <common>\nvarying vec3 vRoadWorldPos;',
@@ -54,17 +55,18 @@ function applyPattern(material: THREE.MeshStandardMaterial, pattern: string) {
       '#include <common>',
       '#include <common>\nvarying vec3 vRoadWorldPos;',
     );
-    // Calcular la posición de mundo en el vertex shader.
     shader.vertexShader = shader.vertexShader.replace(
       '#include <worldpos_vertex>',
       '#include <worldpos_vertex>\nvRoadWorldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;',
     );
-    // Aplicar el patrón en el fragment shader.
+    // Patrón.
     shader.fragmentShader = shader.fragmentShader.replace(
       'vec4 diffuseColor = vec4( diffuse, opacity );',
       `vec4 diffuseColor = vec4( diffuse, opacity );${code}`,
     );
   };
+  // Fuerza un programa único y su recompilación con el patrón.
+  material.customProgramCacheKey = () => `road-${name}`;
   material.needsUpdate = true;
 }
 
