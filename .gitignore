@@ -29,7 +29,6 @@ Plan.md
 
 # Assets generados por scripts (base para editar en Blender; regenerables)
 public/models/generated/
-public/models/streets.glb
 public/models/pois.glb
 
-# El terreno FINAL (public/models/terrain.glb) se commitea: es editado a mano en Blender.
+# terrain.glb y streets.glb (editados a mano en Blender) se commitean.

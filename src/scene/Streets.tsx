@@ -1,27 +1,15 @@
 import { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
-import * as THREE from 'three';
-import { PALETTE } from '../data/scene-config';
-import { getNoiseTexture } from '../lib/noiseTexture';
+import { setupRoadMaterials } from '../lib/roadMaterials';
 
-// Calles de referencia (generadas por scripts/build_streets.mjs).
+// Calles/carreteras/vía (exportadas desde Blender, con materiales nombrados).
 const STREETS_URL = `${import.meta.env.BASE_URL}models/streets.glb`;
 
 export default function Streets() {
   const { scene } = useGLTF(STREETS_URL);
 
   useEffect(() => {
-    const material = new THREE.MeshStandardMaterial({
-      color: PALETTE.road,
-      flatShading: true,
-      side: THREE.DoubleSide,
-      map: getNoiseTexture(),
-    });
-    scene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) {
-        (obj as THREE.Mesh).material = material;
-      }
-    });
+    setupRoadMaterials(scene);
   }, [scene]);
 
   return <primitive object={scene} />;
