@@ -71,21 +71,17 @@ const PATTERNS: Record<string, string> = {
       }`,
 };
 
-// Patrón de la vía (raíles + traviesas), direccional: usa uRailDir/uRailPerp/uRailCenter.
+// Patrón de la vía (traviesas + balasto). Los raíles se modelan como geometría.
 const RAIL_PATTERN = `
       {
         vec2 rel = vRoadWorldPos.xz - uRailCenter;
         float along = dot(rel, uRailDir);
-        float across = dot(rel, uRailPerp);
         // Traviesas: barras perpendiculares, cada 0.7 m, grosor 0.25 m.
         float sleeper = step(0.25, fract(along / 0.7));
-        // Raíles: dos líneas a ±0.7 m del centro (ancho de vía estándar).
-        float rail = 1.0 - smoothstep(0.05, 0.18, abs(abs(across) - 0.7));
         // Balasto (grava) de fondo.
         float g = roadNoise(vRoadWorldPos.xz * 2.0);
         float factor = 0.85 + 0.15 * g;
         factor *= mix(1.0, 0.5, 1.0 - sleeper); // traviesas oscuras
-        factor *= mix(1.0, 1.7, rail);          // raíles claros
         diffuseColor.rgb *= factor;
       }`;
 
@@ -124,11 +120,10 @@ function applyRailPattern(material: THREE.MeshStandardMaterial, dir: { x: number
     injectBase(shader);
     // Uniforms del trazado de la vía.
     shader.uniforms.uRailDir = { value: new THREE.Vector2(dir.x, dir.y) };
-    shader.uniforms.uRailPerp = { value: new THREE.Vector2(-dir.y, dir.x) };
     shader.uniforms.uRailCenter = { value: new THREE.Vector2(center.x, center.y) };
     shader.fragmentShader = shader.fragmentShader.replace(
       '#include <common>',
-      '#include <common>\nuniform vec2 uRailDir;\nuniform vec2 uRailPerp;\nuniform vec2 uRailCenter;',
+      '#include <common>\nuniform vec2 uRailDir;\nuniform vec2 uRailCenter;',
     );
     shader.fragmentShader = shader.fragmentShader.replace(
       'vec4 diffuseColor = vec4( diffuse, opacity );',
