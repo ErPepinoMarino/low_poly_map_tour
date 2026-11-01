@@ -1,14 +1,18 @@
 import * as THREE from 'three';
 
 // Color base (paleta cozy) + patrón procedural por tipo de vía (nombre del material en Blender).
+// Clave normalizada: minúsculas y sin separadores, para que "Calle", "calle" o
+// "calle_1" caigan en el mismo patrón aunque cambie el estilo del nombre.
 const ROAD_TYPES: Record<string, { color: string; pattern: string }> = {
-  Carretera: { color: '#5B6066', pattern: 'asphalt' },
-  Calle: { color: '#7A7468', pattern: 'cobble' },
-  Via: { color: '#6B625A', pattern: 'rail' },
+  carretera: { color: '#5B6066', pattern: 'asphalt' },
+  calle: { color: '#7A7468', pattern: 'cobble' },
+  via: { color: '#6B625A', pattern: 'rail' },
   // Acera: misma familia de adoquín que Calle, pero más fina, más clara y con
   // variación de tono por losa para que se distinga a distancia de maqueta.
-  Acera: { color: '#8C8476', pattern: 'slab' },
+  acera: { color: '#8C8476', pattern: 'slab' },
 };
+
+const normalizeName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 // Funciones auxiliares GLSL (se inyectan antes de main).
 const HELPERS = `
@@ -185,16 +189,17 @@ export function setupRoadMaterials(scene: THREE.Object3D) {
     if (!mesh.isMesh) return;
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     for (const mat of mats) {
-      const name = mat.name;
-      if (!(name in ROAD_TYPES)) continue;
+      const key = normalizeName(mat.name);
+      const type = ROAD_TYPES[key];
+      if (!type) continue;
       const std = mat as THREE.MeshStandardMaterial;
-      std.color.set(ROAD_TYPES[name].color);
-      if (name === 'Via') {
+      std.color.set(type.color);
+      if (key === 'via') {
         const pos = mesh.geometry.getAttribute('position') as THREE.BufferAttribute | undefined;
         const { dir, center } = pos ? dominantDirection(pos.array as Float32Array) : { dir: { x: 1, y: 0 }, center: { x: 0, y: 0 } };
         applyRailPattern(std, dir, center);
       } else {
-        applyPattern(std, ROAD_TYPES[name].pattern);
+        applyPattern(std, type.pattern);
       }
     }
   });

@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
 // Materiales de las casas, identificados por el nombre definido en Blender.
-const ROOF_MATERIALS = ['tejado_teja', 'tejado_teja_oscura', 'tejado_teja_clara'];
-const GARDEN_MATERIAL = 'Jardin';
-const SOLAR_MATERIAL = 'PanelSolar';
+// Se normalizan a minúsculas y sin separadores: "tejado_teja", "TejadoTeja" o
+// "tejado-teja" acaban en el mismo patrón.
+const normalizeName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 // Helpers GLSL (se inyectan antes de main).
 const HELPERS = `
@@ -151,12 +151,14 @@ export function setupHouseMaterials(scene: THREE.Object3D) {
     if (!mesh.isMesh) return;
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     for (const mat of mats) {
-      const name = mat.name;
-      if (ROOF_MATERIALS.includes(name)) {
+      const key = normalizeName(mat.name);
+      // Cualquier tejado (tejado_teja, tejado_teja_oscura, tejado_teja_clara…)
+      // comparte patrón; el color base de cada material se respeta.
+      if (key.startsWith('tejado')) {
         applyPattern(mat as THREE.MeshStandardMaterial, ROOF_PATTERN, 'house-roof');
-      } else if (name === GARDEN_MATERIAL) {
+      } else if (key === 'jardin') {
         applyPattern(mat as THREE.MeshStandardMaterial, GARDEN_PATTERN, 'house-garden');
-      } else if (name === SOLAR_MATERIAL) {
+      } else if (key === 'panelsolar') {
         applyPattern(mat as THREE.MeshStandardMaterial, SOLAR_PATTERN, 'house-solar');
       }
     }
