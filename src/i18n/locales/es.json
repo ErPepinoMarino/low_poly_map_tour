@@ -5,5 +5,10 @@
   },
   "hud": {
     "resetView": "Volver a la vista inicial"
+  },
+  "error": {
+    "title": "Algo ha fallado",
+    "body": "La escena no ha podido cargarse. Abre la consola del navegador (F12) para ver el detalle.",
+    "reload": "Recargar"
   }
 }

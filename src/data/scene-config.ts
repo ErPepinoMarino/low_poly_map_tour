@@ -33,6 +33,8 @@ export const DEFAULT_VIEW = {
 
 // Paleta "cozy" mediterránea — referencia consultable.
 export const PALETTE = {
+  // Fondo neutro oscuro: aísla el diorama y evita el azul marino de la maqueta.
+  background: '#2A2D31',
   wall: '#F2E6D0',
   roof: '#C96F4A',
   vegetation: '#8A9A5B',

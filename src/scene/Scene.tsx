@@ -8,6 +8,7 @@ import { PALETTE } from '../data/scene-config';
 export default function Scene() {
   return (
     <>
+      <color attach="background" args={[PALETTE.background]} />
       <hemisphereLight args={[PALETTE.skyDay, PALETTE.ground, 0.7]} />
       <directionalLight position={[2000, 3000, 1500]} intensity={1.4} />
       <Terrain />

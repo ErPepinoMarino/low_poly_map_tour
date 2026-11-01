@@ -5,5 +5,10 @@
   },
   "hud": {
     "resetView": "Back to default view"
+  },
+  "error": {
+    "title": "Something went wrong",
+    "body": "The scene could not load. Open the browser console (F12) for details.",
+    "reload": "Reload"
   }
 }
