@@ -92,27 +92,28 @@ const GARDEN_PATTERN = `
         diffuseColor.rgb = grass;
       }`;
 
-// Placa solar: retícula de celdas sobre el plano real del faldón (sin deformar),
-// azul profundo con líneas claras de bus y variación por celda.
+// Placa solar: rejilla limpia sobre el plano real del faldón (sin deformar).
+// Celda de 0,50 m (misma escala que la teja): a distancia de diorama se lee como
+// panel, no como ruido. Sin variación aleatoria por celda, que era el grano.
 const SOLAR_PATTERN = `
       {
         float u, v;
         roofFrame(vHouseWorldPos, u, v);
-        vec2 p = vec2(u, v);
-        vec2 cs = vec2(0.16, 0.16);
-        vec2 g = p / cs;
-        vec2 f = fract(g);
-        float lx = smoothstep(0.0, 0.06, min(f.x, 1.0 - f.x));
-        float ly = smoothstep(0.0, 0.06, min(f.y, 1.0 - f.y));
-        float cell = lx * ly;
-        float tone = houseHash(floor(g));
-        vec3 panel = mix(vec3(0.05, 0.09, 0.18), vec3(0.10, 0.16, 0.30), tone);
-        panel *= 0.92 + 0.16 * houseNoise(p * 0.7);
-        vec3 color = mix(vec3(0.55, 0.60, 0.68), panel, cell);
 
-        // Anti-moiré: de lejos queda el azul medio de la placa.
-        float w = max(fwidth(p.x), fwidth(p.y)) / cs.x;
-        color = mix(vec3(0.10, 0.15, 0.27), color, 1.0 - smoothstep(0.5, 1.5, w));
+        float cell = 0.50;
+        vec2 g = vec2(u, v) / cell;
+        vec2 f = fract(g);
+        vec2 edge = min(f, 1.0 - f);
+        float line = 1.0 - smoothstep(0.0, 0.08, min(edge.x, edge.y));
+
+        // Azul profundo con una variación muy suave y de baja frecuencia.
+        float tone = houseNoise(vec2(u, v) * 0.12);
+        vec3 panel = mix(vec3(0.06, 0.11, 0.21), vec3(0.09, 0.15, 0.27), tone);
+        vec3 color = mix(panel, vec3(0.58, 0.63, 0.70), line * 0.9);
+
+        // Anti-moiré: de lejos queda un azul plano, sin rejilla parpadeante.
+        float w = max(fwidth(u), fwidth(v)) / cell;
+        color = mix(vec3(0.08, 0.13, 0.24), color, 1.0 - smoothstep(0.35, 1.0, w));
 
         diffuseColor.rgb = color;
       }`;
