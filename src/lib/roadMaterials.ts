@@ -5,6 +5,9 @@ const ROAD_TYPES: Record<string, { color: string; pattern: string }> = {
   Carretera: { color: '#5B6066', pattern: 'asphalt' },
   Calle: { color: '#7A7468', pattern: 'cobble' },
   Via: { color: '#6B625A', pattern: 'rail' },
+  // Acera: misma familia de adoquín que Calle, pero más fina, más clara y con
+  // variación de tono por losa para que se distinga a distancia de maqueta.
+  Acera: { color: '#8C8476', pattern: 'slab' },
 };
 
 // Funciones auxiliares GLSL (se inyectan antes de main).
@@ -68,6 +71,19 @@ const PATTERNS: Record<string, string> = {
         float edge = v.y - v.x;
         float joint = 1.0 - smoothstep(0.0, 0.05, edge);
         diffuseColor.rgb *= mix(1.0, 0.5, joint);
+      }`,
+  // Losa/adoquín de acera: celdas más pequeñas (~0,6 m), junta algo más ancha y
+  // tono distinto por losa. Se lee como pavimento aunque esté lejos.
+  slab: `
+      {
+        vec2 p = roadTriplanar(vRoadWorldPos) * 1.6;
+        vec2 v = roadVoronoi(p);
+        float edge = v.y - v.x;
+        float joint = 1.0 - smoothstep(0.0, 0.07, edge);
+        float tone = roadHash(floor(p));
+        float factor = mix(1.0, 0.55, joint);
+        factor *= 0.88 + 0.20 * tone;
+        diffuseColor.rgb *= factor;
       }`,
 };
 

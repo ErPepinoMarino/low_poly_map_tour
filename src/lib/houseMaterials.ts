@@ -3,6 +3,7 @@ import * as THREE from 'three';
 // Materiales de las casas, identificados por el nombre definido en Blender.
 const ROOF_MATERIALS = ['tejado_teja', 'tejado_teja_oscura', 'tejado_teja_clara'];
 const GARDEN_MATERIAL = 'Jardin';
+const SOLAR_MATERIAL = 'PanelSolar';
 
 // Helpers GLSL (se inyectan antes de main).
 const HELPERS = `
@@ -91,6 +92,31 @@ const GARDEN_PATTERN = `
         diffuseColor.rgb = grass;
       }`;
 
+// Placa solar: retícula de celdas sobre el plano real del faldón (sin deformar),
+// azul profundo con líneas claras de bus y variación por celda.
+const SOLAR_PATTERN = `
+      {
+        float u, v;
+        roofFrame(vHouseWorldPos, u, v);
+        vec2 p = vec2(u, v);
+        vec2 cs = vec2(0.16, 0.16);
+        vec2 g = p / cs;
+        vec2 f = fract(g);
+        float lx = smoothstep(0.0, 0.06, min(f.x, 1.0 - f.x));
+        float ly = smoothstep(0.0, 0.06, min(f.y, 1.0 - f.y));
+        float cell = lx * ly;
+        float tone = houseHash(floor(g));
+        vec3 panel = mix(vec3(0.05, 0.09, 0.18), vec3(0.10, 0.16, 0.30), tone);
+        panel *= 0.92 + 0.16 * houseNoise(p * 0.7);
+        vec3 color = mix(vec3(0.55, 0.60, 0.68), panel, cell);
+
+        // Anti-moiré: de lejos queda el azul medio de la placa.
+        float w = max(fwidth(p.x), fwidth(p.y)) / cs.x;
+        color = mix(vec3(0.10, 0.15, 0.27), color, 1.0 - smoothstep(0.5, 1.5, w));
+
+        diffuseColor.rgb = color;
+      }`;
+
 function injectWorldPosition(shader: { vertexShader: string; fragmentShader: string }) {
   shader.vertexShader = shader.vertexShader.replace(
     '#include <common>',
@@ -130,6 +156,8 @@ export function setupHouseMaterials(scene: THREE.Object3D) {
         applyPattern(mat as THREE.MeshStandardMaterial, ROOF_PATTERN, 'house-roof');
       } else if (name === GARDEN_MATERIAL) {
         applyPattern(mat as THREE.MeshStandardMaterial, GARDEN_PATTERN, 'house-garden');
+      } else if (name === SOLAR_MATERIAL) {
+        applyPattern(mat as THREE.MeshStandardMaterial, SOLAR_PATTERN, 'house-solar');
       }
     }
   });
