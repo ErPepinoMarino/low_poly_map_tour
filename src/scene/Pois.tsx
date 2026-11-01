@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { PALETTE } from '../data/scene-config';
 
-// Cubos de referencia de los POIs (generados por scripts/build_pois.mjs).
+// POIs (modelos simplificados, aún sin textura) como marcadores de posición.
 const POIS_URL = `${import.meta.env.BASE_URL}models/pois.glb`;
 
 export default function Pois() {
@@ -10,7 +11,7 @@ export default function Pois() {
 
   useEffect(() => {
     const material = new THREE.MeshStandardMaterial({
-      vertexColors: true,
+      color: PALETTE.accent,
       flatShading: true,
       side: THREE.DoubleSide,
     });

@@ -1,5 +1,6 @@
 import Terrain from './Terrain';
 import Streets from './Streets';
+import Houses from './Houses';
 import Pois from './Pois';
 import { PALETTE } from '../data/scene-config';
 
@@ -11,6 +12,7 @@ export default function Scene() {
       <directionalLight position={[2000, 3000, 1500]} intensity={1.4} />
       <Terrain />
       <Streets />
+      <Houses />
       <Pois />
     </>
   );
