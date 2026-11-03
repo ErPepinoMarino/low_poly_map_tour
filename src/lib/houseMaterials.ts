@@ -153,9 +153,9 @@ export function setupHouseMaterials(scene: THREE.Object3D) {
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     for (const mat of mats) {
       const key = normalizeName(mat.name);
-      // Cualquier tejado (tejado_teja, tejado_teja_oscura, tejado_teja_clara…)
-      // comparte patrón; el color base de cada material se respeta.
-      if (key.startsWith('tejado')) {
+      // Cualquier tejado (tejado_teja, tejado_teja_oscura, tejaAzul…) comparte
+      // patrón; el color base de cada material se respeta.
+      if (key.startsWith('teja')) {
         applyPattern(mat as THREE.MeshStandardMaterial, ROOF_PATTERN, 'house-roof');
       } else if (key === 'jardin') {
         applyPattern(mat as THREE.MeshStandardMaterial, GARDEN_PATTERN, 'house-garden');
