@@ -26,6 +26,34 @@ function formatHour(hour: number): string {
 
 const fmtVec = (v: [number, number, number]) => v.map((n) => n.toFixed(1)).join(', ');
 
+function smoothstep(edge0: number, edge1: number, x: number): number {
+  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
+  return t * t * (3 - 2 * t);
+}
+
+// Estado en vivo del DOF: distancia actual y si cae dentro del rango configurado.
+function DofStatus() {
+  const { t } = useTranslation();
+  const effects = useStore((s) => s.effects);
+  const performanceMode = useStore((s) => s.performanceMode);
+  const dofNear = useStore((s) => s.dofNear);
+  const dofFar = useStore((s) => s.dofFar);
+  const distance = useStore((s) => s.cameraInfo?.distance ?? null);
+
+  if (distance === null) return <div className="hud-dof-status">…</div>;
+
+  const active = effects.dof && !performanceMode && distance < dofFar;
+  const strength = 1 - smoothstep(dofNear, dofFar, distance);
+
+  return (
+    <div className={`hud-dof-status${active ? ' active' : ''}`}>
+      {active
+        ? `${t('hud.dofActive')} · ${t('hud.dofStrength')} ${strength.toFixed(2)} · ${distance.toFixed(0)} m`
+        : `${t('hud.dofOff')} · ${distance.toFixed(0)} m`}
+    </div>
+  );
+}
+
 function copyCamera(info: CameraInfo) {
   const text = [
     `position: [${fmtVec(info.position)}]`,
@@ -192,6 +220,7 @@ export default function Overlay() {
             />
           </label>
         </div>
+        <DofStatus />
       </section>
 
       <CameraPanel />

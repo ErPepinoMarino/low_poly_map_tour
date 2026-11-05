@@ -20,7 +20,10 @@
     "camera": "Camera",
     "copy": "Copy",
     "dofNear": "DOF from (m)",
-    "dofFar": "DOF to (m)"
+    "dofFar": "DOF to (m)",
+    "dofActive": "DOF on",
+    "dofOff": "DOF off",
+    "dofStrength": "strength"
   },
   "error": {
     "title": "Something went wrong",

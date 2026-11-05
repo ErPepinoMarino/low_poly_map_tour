@@ -33,12 +33,9 @@ export default function App() {
         <OrbitControls
           makeDefault
           enableDamping
-          enablePan={false}
           target={[0, 0, 0]}
           minDistance={CAMERA_LIMITS.minDistance}
           maxDistance={CAMERA_LIMITS.maxDistance}
-          minPolarAngle={CAMERA_LIMITS.minPolarAngle}
-          maxPolarAngle={CAMERA_LIMITS.maxPolarAngle}
         />
         <CameraTelemetry />
       </Canvas>

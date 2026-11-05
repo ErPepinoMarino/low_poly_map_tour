@@ -18,10 +18,10 @@ export const BBOX = {
 export const CAMERA_LIMITS = {
   minDistance: 400,
   maxDistance: 8000,
-  minPolarAngle: 0.15, // ~8.6° (casi cenital)
-  // 70°: con minDistance 400 la altura mínima de cámara es ~137 m.
-  // Evita ver la parte de abajo del diorama sin impedir una vista baja.
-  maxPolarAngle: 1.22,
+  // Límites de inclinación pendientes de que el usuario los valide.
+  // NO se aplican todavía: se dejan sin restricción en OrbitControls.
+  minPolarAngle: 0,
+  maxPolarAngle: Math.PI,
   minAzimuthAngle: -Infinity,
   maxAzimuthAngle: Infinity,
 } as const;
@@ -74,8 +74,8 @@ export const LIGHTING = {
   dof: {
     near: 500,
     far: 1200,
-    maxBokeh: 2.0,
-    focusRange: 140,
+    maxBokeh: 4.0,
+    focusRange: 120,
     resolutionScale: 0.5,
   },
   colors: {

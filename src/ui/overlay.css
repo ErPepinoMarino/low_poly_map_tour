@@ -152,6 +152,17 @@
   font: inherit;
 }
 
+.hud-dof-status {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.hud-dof-status.active {
+  color: #ffc87a;
+  opacity: 1;
+}
+
 @media (max-width: 600px) {
   .hud {
     padding: 10px;

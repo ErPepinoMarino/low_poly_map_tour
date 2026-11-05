@@ -20,7 +20,10 @@
     "camera": "Cámara",
     "copy": "Copiar",
     "dofNear": "DOF desde (m)",
-    "dofFar": "DOF hasta (m)"
+    "dofFar": "DOF hasta (m)",
+    "dofActive": "DOF activo",
+    "dofOff": "DOF apagado",
+    "dofStrength": "fuerza"
   },
   "error": {
     "title": "Algo ha fallado",
