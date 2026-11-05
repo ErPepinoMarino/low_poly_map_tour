@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
+import * as THREE from 'three';
 import { setupNamedMaterials } from '../lib/materials';
 
 // Casas del pueblo (exportadas desde Blender con materiales nombrados).
@@ -11,6 +12,13 @@ export default function Houses() {
 
   useEffect(() => {
     setupNamedMaterials(scene);
+    scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+      }
+    });
   }, [scene]);
 
   return <primitive object={scene} />;

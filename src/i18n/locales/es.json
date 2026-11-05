@@ -15,6 +15,7 @@
     "bloom": "Bloom",
     "vignette": "Viñeta",
     "fog": "Niebla",
+    "shadows": "Sombras",
     "performance": "Modo rendimiento"
   },
   "error": {

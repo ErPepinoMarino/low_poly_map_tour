@@ -70,16 +70,19 @@ export function getTimeState(date: Date): TimeState {
   const sun = getPosition(date, TOWN.lat, TOWN.lon);
   const moon = getMoonPosition(date, TOWN.lat, TOWN.lon);
   const p = getTownParts(date);
+  // SunCalc 2.x devuelve grados; el resto del código trabaja en radianes.
+  const sunAltitude = (sun.altitude * Math.PI) / 180;
+  const sunAzimuth = (sun.azimuth * Math.PI) / 180;
   return {
     date,
     townTime: formatTownTime(date),
     townHour: p.hour + p.minute / 60 + p.second / 3600,
-    sunAltitude: sun.altitude,
-    sunAzimuth: sun.azimuth,
-    moonAltitude: moon.altitude,
-    moonAzimuth: moon.azimuth,
+    sunAltitude,
+    sunAzimuth,
+    moonAltitude: (moon.altitude * Math.PI) / 180,
+    moonAzimuth: (moon.azimuth * Math.PI) / 180,
     // 0 con sol alto, 1 con sol por debajo de ~-7°; transición suave en el crepúsculo.
-    nightFactor: 1 - smoothstep(-0.12, 0.08, sun.altitude),
+    nightFactor: 1 - smoothstep(-0.12, 0.08, sunAltitude),
   };
 }
 

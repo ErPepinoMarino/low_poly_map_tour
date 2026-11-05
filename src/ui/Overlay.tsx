@@ -15,6 +15,7 @@ const EFFECTS = [
   { id: 'bloom', label: 'hud.bloom' },
   { id: 'vignette', label: 'hud.vignette' },
   { id: 'fog', label: 'hud.fog' },
+  { id: 'shadows', label: 'hud.shadows' },
 ] as const;
 
 function formatHour(hour: number): string {

@@ -16,8 +16,11 @@ export default function Pois() {
       side: THREE.DoubleSide,
     });
     scene.traverse((obj) => {
-      if ((obj as THREE.Mesh).isMesh) {
-        (obj as THREE.Mesh).material = material;
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) {
+        mesh.material = material;
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
       }
     });
   }, [scene]);

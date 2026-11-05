@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { LIGHTING, PALETTE } from '../data/scene-config';
+import { LIGHTING } from '../data/scene-config';
 import { useTimeOfDay } from '../lighting/useTimeOfDay';
 import { directionFromAltAz } from '../lib/timeOfDay';
 import { useStore } from '../store/useStore';
@@ -16,10 +16,12 @@ const C = {
   groundNight: new THREE.Color(LIGHTING.colors.groundNight),
   ambientDay: new THREE.Color(LIGHTING.colors.ambientDay),
   ambientNight: new THREE.Color(LIGHTING.colors.ambientNight),
-  fogDay: new THREE.Color(LIGHTING.colors.fogDay),
   fogNight: new THREE.Color(LIGHTING.colors.fogNight),
-  backgroundDay: new THREE.Color(LIGHTING.colors.backgroundDay),
+  fogSunset: new THREE.Color(LIGHTING.colors.fogSunset),
+  fogDay: new THREE.Color(LIGHTING.colors.fogDay),
   backgroundNight: new THREE.Color(LIGHTING.colors.backgroundNight),
+  backgroundSunset: new THREE.Color(LIGHTING.colors.backgroundSunset),
+  backgroundDay: new THREE.Color(LIGHTING.colors.backgroundDay),
 };
 
 const tmpSunPos = new THREE.Vector3();
@@ -35,6 +37,28 @@ function smoothstep(edge0: number, edge1: number, x: number): number {
   return t * t * (3 - 2 * t);
 }
 
+// Cielo: azul profundo de noche → naranja en el horizonte → azul claro de día.
+function backgroundForAltitude(altitude: number, out: THREE.Color): THREE.Color {
+  if (altitude <= -0.12) return out.copy(C.backgroundNight);
+  if (altitude < 0) {
+    return out
+      .copy(C.backgroundNight)
+      .lerp(C.backgroundSunset, smoothstep(-0.12, 0, altitude));
+  }
+  return out
+    .copy(C.backgroundSunset)
+    .lerp(C.backgroundDay, smoothstep(0, 0.35, altitude));
+}
+
+// La niebla sigue al cielo, un poco más apagada para leerse sobre él.
+function fogForAltitude(altitude: number, out: THREE.Color): THREE.Color {
+  if (altitude <= -0.12) return out.copy(C.fogNight);
+  if (altitude < 0) {
+    return out.copy(C.fogNight).lerp(C.fogSunset, smoothstep(-0.12, 0, altitude));
+  }
+  return out.copy(C.fogSunset).lerp(C.fogDay, smoothstep(0, 0.35, altitude));
+}
+
 // Sol/luna, hemisférica, ambiente, niebla y fondo sincronizados con la hora.
 export default function SunMoon() {
   const sunRef = useRef<THREE.DirectionalLight>(null);
@@ -45,6 +69,12 @@ export default function SunMoon() {
   const firstFrame = useRef(true);
   const time = useTimeOfDay();
   const fogEnabled = useStore((s) => s.effects.fog);
+  const shadowsEnabled = useStore((s) => s.effects.shadows);
+  const performanceMode = useStore((s) => s.performanceMode);
+  const qualityTier = useStore((s) => s.qualityTier);
+  const shadowsOn = shadowsEnabled && !performanceMode;
+  const shadowSize =
+    qualityTier === 'low' ? LIGHTING.shadow.mapSizeLow : LIGHTING.shadow.mapSizeHigh;
 
   useFrame((_, delta) => {
     const sun = sunRef.current;
@@ -57,15 +87,14 @@ export default function SunMoon() {
     const altitude = time.sunAltitude;
     const isNight = altitude < -0.02;
 
-    // Dirección: sol de día, luna de noche. Mantenemos la luz por encima del horizonte.
-    const dir = isNight
-      ? directionFromAltAz(time.moonAltitude, time.moonAzimuth)
-      : directionFromAltAz(time.sunAltitude, time.sunAzimuth);
+    // Dirección artística fija (sur-sureste, ~66°): las sombras van al norte-noroeste.
+    // No seguimos la posición solar real para que las sombras sean legibles y cortas.
+    const dir = directionFromAltAz(LIGHTING.shadow.elevation, LIGHTING.shadow.azimuth);
     const dirY = Math.max(0.16, dir.y);
     tmpSunPos.set(dir.x, dirY, dir.z).normalize().multiplyScalar(3200);
     sun.position.lerp(tmpSunPos, instant ? 1 : 1 - Math.exp(-delta * 1.8));
 
-    // Color e intensidad: blanco cálido al mediodía, naranja al horizonte, luna fría de noche.
+    // Color e intensidad sí siguen la hora: blanco cálido, naranja al horizonte, luna fría.
     const horizonMix = 1 - smoothstep(0.0, 0.45, altitude);
     if (isNight) {
       tmpSunColor.copy(C.moon);
@@ -110,7 +139,7 @@ export default function SunMoon() {
 
     const fog = fogRef.current;
     if (fog) {
-      tmpFog.copy(C.fogNight).lerp(C.fogDay, daylight);
+      fogForAltitude(altitude, tmpFog);
       fog.color.lerp(tmpFog, colorAlpha);
       const fogDensity = fogEnabled ? LIGHTING.fogDensity : 0;
       fog.density = instant
@@ -120,7 +149,7 @@ export default function SunMoon() {
 
     const background = backgroundRef.current;
     if (background) {
-      tmpBackground.copy(C.backgroundNight).lerp(C.backgroundDay, daylight);
+      backgroundForAltitude(altitude, tmpBackground);
       background.lerp(tmpBackground, colorAlpha);
     }
 
@@ -129,7 +158,11 @@ export default function SunMoon() {
 
   return (
     <>
-      <color attach="background" ref={backgroundRef} args={[PALETTE.background]} />
+      <color
+        attach="background"
+        ref={backgroundRef}
+        args={[LIGHTING.colors.backgroundNight]}
+      />
       <fogExp2
         attach="fog"
         ref={fogRef}
@@ -151,6 +184,16 @@ export default function SunMoon() {
         color={LIGHTING.colors.sunDay}
         intensity={LIGHTING.intensities.sunDay}
         position={[2000, 3000, 1500]}
+        castShadow={shadowsOn}
+        shadow-mapSize={[shadowSize, shadowSize]}
+        shadow-camera-left={-LIGHTING.shadow.cameraSize}
+        shadow-camera-right={LIGHTING.shadow.cameraSize}
+        shadow-camera-top={LIGHTING.shadow.cameraSize}
+        shadow-camera-bottom={-LIGHTING.shadow.cameraSize}
+        shadow-camera-near={LIGHTING.shadow.near}
+        shadow-camera-far={LIGHTING.shadow.far}
+        shadow-bias={LIGHTING.shadow.bias}
+        shadow-normalBias={LIGHTING.shadow.normalBias}
       />
     </>
   );

@@ -56,7 +56,20 @@ export const PALETTE = {
 export const LIGHTING = {
   dayHour: 10.5,
   nightHour: 22.5,
-  fogDensity: 0.00009,
+  fogDensity: 0.00032,
+  // Dirección artística de la luz (no la del sol real): sur-sureste, ~66°.
+  // Sombras hacia el norte-noroeste, visibles pero no extremas.
+  shadow: {
+    azimuth: -0.35,
+    elevation: 1.05,
+    mapSizeHigh: 4096,
+    mapSizeLow: 2048,
+    cameraSize: 900,
+    near: 1,
+    far: 7000,
+    bias: -0.0002,
+    normalBias: 0.03,
+  },
   dof: {
     near: 500,
     far: 1200,
@@ -74,10 +87,14 @@ export const LIGHTING = {
     groundNight: '#0E131C',
     ambientDay: '#FFFFFF',
     ambientNight: '#5A6B8C',
-    fogDay: '#8E9AA0',
-    fogNight: '#1E232A',
-    backgroundDay: '#30343A',
-    backgroundNight: '#2A2D31',
+    // Cielo/fondo por altura solar: noche azul profundo, horizonte anaranjado, día azul claro.
+    backgroundNight: '#0E1626',
+    backgroundSunset: '#E8A87C',
+    backgroundDay: '#A8D4E8',
+    // La niebla va un paso por detrás del cielo para leerse sobre él.
+    fogNight: '#1A2740',
+    fogSunset: '#D99A76',
+    fogDay: '#B9D2DE',
   },
   intensities: {
     sunDay: 2.2,

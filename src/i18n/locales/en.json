@@ -15,6 +15,7 @@
     "bloom": "Bloom",
     "vignette": "Vignette",
     "fog": "Fog",
+    "shadows": "Shadows",
     "performance": "Performance mode"
   },
   "error": {

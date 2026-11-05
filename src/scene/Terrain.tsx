@@ -20,6 +20,7 @@ export default function Terrain() {
         mesh.material = hasColors
           ? new THREE.MeshStandardMaterial({ vertexColors: true, flatShading: true, map: noise })
           : new THREE.MeshStandardMaterial({ color: PALETTE.vegetation, flatShading: true, map: noise });
+        mesh.receiveShadow = true;
       }
     });
   }, [scene]);

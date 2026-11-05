@@ -21,6 +21,7 @@ export default function App() {
       <Canvas
         camera={{ position: [0, 2400, 2600], fov: 45, near: 1, far: 20000 }}
         dpr={dpr}
+        shadows="percentage"
         onCreated={({ gl }) => {
           gl.toneMapping = THREE.AgXToneMapping;
           gl.toneMappingExposure = LIGHTING.exposure.day;

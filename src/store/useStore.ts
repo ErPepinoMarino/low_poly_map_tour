@@ -3,7 +3,7 @@ import { create } from 'zustand';
 export type UiState = 'free' | 'selected';
 export type LightMode = 'real' | 'day' | 'night' | 'manual';
 export type QualityTier = 'low' | 'high';
-export type EffectId = 'dof' | 'bloom' | 'vignette' | 'fog' | 'smaa';
+export type EffectId = 'dof' | 'bloom' | 'vignette' | 'fog' | 'smaa' | 'shadows';
 
 const isMobile =
   typeof window !== 'undefined' &&
@@ -53,6 +53,7 @@ export const useStore = create<AppState>((set) => ({
     vignette: true,
     fog: true,
     smaa: true,
+    shadows: !isMobile,
   },
   performanceMode: false,
   qualityTier: isMobile ? 'low' : 'high',

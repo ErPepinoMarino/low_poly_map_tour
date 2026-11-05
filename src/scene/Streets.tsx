@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
+import * as THREE from 'three';
 import { setupNamedMaterials } from '../lib/materials';
 
 // Calles/carreteras/vía (exportadas desde Blender, con materiales nombrados).
@@ -10,6 +11,10 @@ export default function Streets() {
 
   useEffect(() => {
     setupNamedMaterials(scene);
+    scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh;
+      if (mesh.isMesh) mesh.receiveShadow = true;
+    });
   }, [scene]);
 
   return <primitive object={scene} />;
