@@ -1,0 +1,133 @@
+.hud {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  pointer-events: none;
+  font-size: 13px;
+}
+
+.hud-panel {
+  pointer-events: auto;
+  background: rgba(18, 20, 23, 0.82);
+  color: #f2e6d0;
+  border: 1px solid rgba(242, 230, 208, 0.14);
+  border-radius: 10px;
+  padding: 12px 14px;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.hud-title h1 {
+  font-size: 16px;
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+
+.hud-title p {
+  margin: 4px 0 0;
+  opacity: 0.65;
+}
+
+.hud-controls {
+  width: min(360px, calc(100vw - 32px));
+  display: grid;
+  gap: 8px;
+}
+
+.hud-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hud-label {
+  opacity: 0.75;
+  font-size: 12px;
+}
+
+.hud-label strong {
+  color: #ffc87a;
+  font-weight: 600;
+}
+
+.hud button {
+  appearance: none;
+  border: 1px solid rgba(242, 230, 208, 0.22);
+  background: rgba(242, 230, 208, 0.06);
+  color: #f2e6d0;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.hud button:hover {
+  background: rgba(242, 230, 208, 0.14);
+}
+
+.hud button.active {
+  background: #e0a23c;
+  border-color: #e0a23c;
+  color: #1b1b1b;
+  font-weight: 700;
+}
+
+.hud-slider {
+  display: grid;
+  gap: 4px;
+}
+
+.hud-slider span {
+  opacity: 0.8;
+  font-size: 12px;
+}
+
+.hud-slider input[type='range'] {
+  width: 100%;
+  accent-color: #e0a23c;
+  cursor: pointer;
+}
+
+.hud-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 10px;
+}
+
+.hud-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.hud-check input {
+  accent-color: #e0a23c;
+}
+
+@media (max-width: 600px) {
+  .hud {
+    padding: 10px;
+  }
+
+  .hud-title p {
+    display: none;
+  }
+
+  .hud-controls {
+    width: calc(100vw - 20px);
+  }
+
+  .hud-grid {
+    grid-template-columns: 1fr;
+  }
+}

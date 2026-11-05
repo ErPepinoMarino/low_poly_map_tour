@@ -50,3 +50,46 @@ export const PALETTE = {
   nightAmbient: '#1B2A4A',
   nightLight: '#FFC87A',
 } as const;
+
+// Look final: horas representativas, niebla, DOF y colores de luz.
+// Las horas son locales de Almenara (Europe/Madrid), no del dispositivo.
+export const LIGHTING = {
+  dayHour: 10.5,
+  nightHour: 22.5,
+  fogDensity: 0.00009,
+  dof: {
+    near: 500,
+    far: 1200,
+    maxBokeh: 2.0,
+    focusRange: 140,
+    resolutionScale: 0.5,
+  },
+  colors: {
+    sunDay: '#FFF3DA',
+    sunSet: '#FFB26B',
+    moon: '#9DB4E0',
+    skyDay: '#A8D4E8',
+    skyNight: '#1B2A4A',
+    groundDay: '#C9B08A',
+    groundNight: '#0E131C',
+    ambientDay: '#FFFFFF',
+    ambientNight: '#5A6B8C',
+    fogDay: '#8E9AA0',
+    fogNight: '#1E232A',
+    backgroundDay: '#30343A',
+    backgroundNight: '#2A2D31',
+  },
+  intensities: {
+    sunDay: 2.2,
+    sunSet: 1.3,
+    moon: 0.35,
+    hemisphereDay: 0.7,
+    hemisphereNight: 0.35,
+    ambientDay: 0.12,
+    ambientNight: 0.06,
+  },
+  exposure: {
+    day: 1.0,
+    night: 1.15,
+  },
+} as const;

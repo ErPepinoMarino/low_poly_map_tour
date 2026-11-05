@@ -4,7 +4,18 @@
     "subtitle": "Interactive low-poly diorama"
   },
   "hud": {
-    "resetView": "Back to default view"
+    "resetView": "Back to default view",
+    "townTime": "Time in Almenara",
+    "time": "Time",
+    "real": "Live",
+    "day": "Day",
+    "night": "Night",
+    "effects": "Effects",
+    "dof": "Depth of field",
+    "bloom": "Bloom",
+    "vignette": "Vignette",
+    "fog": "Fog",
+    "performance": "Performance mode"
   },
   "error": {
     "title": "Something went wrong",

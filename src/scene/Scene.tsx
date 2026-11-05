@@ -1,16 +1,15 @@
-import Terrain from './Terrain';
-import Streets from './Streets';
 import Houses from './Houses';
 import Pois from './Pois';
-import { PALETTE } from '../data/scene-config';
+import Streets from './Streets';
+import SunMoon from './SunMoon';
+import Terrain from './Terrain';
 
-// Fase 2: escena base. Iluminación básica neutra (se refina en Fase 3/6).
+// Escena base + look final. SunMoon gobierna luz, fondo y niebla a partir de la
+// hora de Almenara; el resto de capas son independientes.
 export default function Scene() {
   return (
     <>
-      <color attach="background" args={[PALETTE.background]} />
-      <hemisphereLight args={[PALETTE.skyDay, PALETTE.ground, 0.7]} />
-      <directionalLight position={[2000, 3000, 1500]} intensity={1.4} />
+      <SunMoon />
       <Terrain />
       <Streets />
       <Houses />

@@ -4,7 +4,18 @@
     "subtitle": "Diorama low-poly interactivo"
   },
   "hud": {
-    "resetView": "Volver a la vista inicial"
+    "resetView": "Volver a la vista inicial",
+    "townTime": "Hora en Almenara",
+    "time": "Hora",
+    "real": "Real",
+    "day": "Día",
+    "night": "Noche",
+    "effects": "Efectos",
+    "dof": "Profundidad de campo",
+    "bloom": "Bloom",
+    "vignette": "Viñeta",
+    "fog": "Niebla",
+    "performance": "Modo rendimiento"
   },
   "error": {
     "title": "Algo ha fallado",
