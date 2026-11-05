@@ -24,6 +24,10 @@ function smoothstep(edge0: number, edge1: number, x: number): number {
 export default function Effects() {
   const effects = useStore((s) => s.effects);
   const performanceMode = useStore((s) => s.performanceMode);
+  const dofNear = useStore((s) => s.dofNear);
+  const dofFar = useStore((s) => s.dofFar);
+  const near = Math.min(dofNear, dofFar - 1);
+  const far = Math.max(dofFar, near + 1);
   const dofRef = useRef<DepthOfFieldEffect>(null);
   const camera = useThree((s) => s.camera);
   const controls = useThree((s) => s.controls) as unknown as {
@@ -34,12 +38,12 @@ export default function Effects() {
   useFrame(() => {
     const target = controls?.target ?? ORIGIN;
     const distance = camera.position.distanceTo(target);
-    const active = effects.dof && !performanceMode && distance < LIGHTING.dof.far;
+    const active = effects.dof && !performanceMode && distance < far;
     if (active !== dofActive) setDofActive(active);
 
     const dof = dofRef.current;
     if (dof) {
-      const strength = 1 - smoothstep(LIGHTING.dof.near, LIGHTING.dof.far, distance);
+      const strength = 1 - smoothstep(near, far, distance);
       dof.circleOfConfusionMaterial.focusDistance = distance;
       dof.circleOfConfusionMaterial.focusRange = LIGHTING.dof.focusRange;
       dof.bokehScale = LIGHTING.dof.maxBokeh * strength;

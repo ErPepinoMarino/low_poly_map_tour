@@ -72,7 +72,8 @@ export default function SunMoon() {
   const shadowsEnabled = useStore((s) => s.effects.shadows);
   const performanceMode = useStore((s) => s.performanceMode);
   const qualityTier = useStore((s) => s.qualityTier);
-  const shadowsOn = shadowsEnabled && !performanceMode;
+  // De noche no tiene sentido proyectar sombras: se apagan al bajar el sol.
+  const shadowsOn = shadowsEnabled && !performanceMode && time.sunAltitude > -0.02;
   const shadowSize =
     qualityTier === 'low' ? LIGHTING.shadow.mapSizeLow : LIGHTING.shadow.mapSizeHigh;
 
@@ -87,9 +88,10 @@ export default function SunMoon() {
     const altitude = time.sunAltitude;
     const isNight = altitude < -0.02;
 
-    // Dirección artística fija (sur-sureste, ~66°): las sombras van al norte-noroeste.
-    // No seguimos la posición solar real para que las sombras sean legibles y cortas.
-    const dir = directionFromAltAz(LIGHTING.shadow.elevation, LIGHTING.shadow.azimuth);
+    // Elevación fija 40° (sombras largas) + azimut real del sol/luna: la sombra gira
+    // con la hora. De noche las sombras se apagan, así que solo importa la luz.
+    const lightAzimuth = isNight ? time.moonAzimuth : time.sunAzimuth;
+    const dir = directionFromAltAz(LIGHTING.shadow.elevation, lightAzimuth);
     const dirY = Math.max(0.16, dir.y);
     tmpSunPos.set(dir.x, dirY, dir.z).normalize().multiplyScalar(3200);
     sun.position.lerp(tmpSunPos, instant ? 1 : 1 - Math.exp(-delta * 1.8));

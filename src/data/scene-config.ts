@@ -16,10 +16,12 @@ export const BBOX = {
 
 // Límites de órbita (zoom, inclinación, rotación).
 export const CAMERA_LIMITS = {
-  minDistance: 20,
-  maxDistance: 400,
-  minPolarAngle: 0.15,
-  maxPolarAngle: 1.45,
+  minDistance: 400,
+  maxDistance: 8000,
+  minPolarAngle: 0.15, // ~8.6° (casi cenital)
+  // 70°: con minDistance 400 la altura mínima de cámara es ~137 m.
+  // Evita ver la parte de abajo del diorama sin impedir una vista baja.
+  maxPolarAngle: 1.22,
   minAzimuthAngle: -Infinity,
   maxAzimuthAngle: Infinity,
 } as const;
@@ -57,10 +59,9 @@ export const LIGHTING = {
   dayHour: 10.5,
   nightHour: 22.5,
   fogDensity: 0.00032,
-  // Dirección artística de la luz (no la del sol real): sur-sureste, 40° fijo.
-  // Sombras largas y efectistas hacia el norte-noroeste (casa de 20 m → ~24 m).
+  // Luz direccional: elevación fija 40° y azimut real del sol.
+  // Sombras largas que giran con la hora; se apagan de noche.
   shadow: {
-    azimuth: -0.35,
     elevation: 0.698,
     mapSizeHigh: 4096,
     mapSizeLow: 2048,

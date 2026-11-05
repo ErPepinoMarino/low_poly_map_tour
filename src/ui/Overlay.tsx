@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { LIGHTING } from '../data/scene-config';
 import { useTimeOfDay } from '../lighting/useTimeOfDay';
-import { useStore } from '../store/useStore';
+import { useStore, type CameraInfo } from '../store/useStore';
 import './overlay.css';
 
 const MODES = [
@@ -24,6 +24,47 @@ function formatHour(hour: number): string {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
 }
 
+const fmtVec = (v: [number, number, number]) => v.map((n) => n.toFixed(1)).join(', ');
+
+function copyCamera(info: CameraInfo) {
+  const text = [
+    `position: [${fmtVec(info.position)}]`,
+    `target: [${fmtVec(info.target)}]`,
+    `rotation: [${fmtVec(info.rotation)}]`,
+    `distance: ${info.distance.toFixed(1)}`,
+    `polar: ${info.polar.toFixed(1)}`,
+    `azimuth: ${info.azimuth.toFixed(1)}`,
+  ].join('\n');
+  void navigator.clipboard?.writeText(text).catch(() => {});
+}
+
+function CameraPanel() {
+  const { t } = useTranslation();
+  const cameraInfo = useStore((s) => s.cameraInfo);
+
+  return (
+    <section className="hud-panel hud-camera">
+      <div className="hud-label">{t('hud.camera')}</div>
+      {cameraInfo ? (
+        <>
+          <div className="hud-mono">pos [{fmtVec(cameraInfo.position)}]</div>
+          <div className="hud-mono">rot [{fmtVec(cameraInfo.rotation)}]°</div>
+          <div className="hud-mono">tgt [{fmtVec(cameraInfo.target)}]</div>
+          <div className="hud-mono">
+            dist {cameraInfo.distance.toFixed(1)} m · polar {cameraInfo.polar.toFixed(1)}° · azim{' '}
+            {cameraInfo.azimuth.toFixed(1)}°
+          </div>
+          <button type="button" onClick={() => copyCamera(cameraInfo)}>
+            {t('hud.copy')}
+          </button>
+        </>
+      ) : (
+        <div className="hud-mono">…</div>
+      )}
+    </section>
+  );
+}
+
 export default function Overlay() {
   const { t, i18n } = useTranslation();
   const language = useStore((s) => s.language);
@@ -34,6 +75,10 @@ export default function Overlay() {
   const setManualHour = useStore((s) => s.setManualHour);
   const effects = useStore((s) => s.effects);
   const setEffect = useStore((s) => s.setEffect);
+  const dofNear = useStore((s) => s.dofNear);
+  const dofFar = useStore((s) => s.dofFar);
+  const setDofNear = useStore((s) => s.setDofNear);
+  const setDofFar = useStore((s) => s.setDofFar);
   const performanceMode = useStore((s) => s.performanceMode);
   const setPerformanceMode = useStore((s) => s.setPerformanceMode);
   const time = useTimeOfDay();
@@ -122,7 +167,34 @@ export default function Overlay() {
             {t('hud.performance')}
           </label>
         </div>
+
+        <div className="hud-dof-range">
+          <label>
+            {t('hud.dofNear')}
+            <input
+              type="number"
+              min={20}
+              max={7990}
+              step={50}
+              value={Math.round(dofNear)}
+              onChange={(e) => setDofNear(Number(e.target.value))}
+            />
+          </label>
+          <label>
+            {t('hud.dofFar')}
+            <input
+              type="number"
+              min={30}
+              max={8000}
+              step={50}
+              value={Math.round(dofFar)}
+              onChange={(e) => setDofFar(Number(e.target.value))}
+            />
+          </label>
+        </div>
       </section>
+
+      <CameraPanel />
     </div>
   );
 }

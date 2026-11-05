@@ -16,7 +16,11 @@
     "vignette": "Viñeta",
     "fog": "Niebla",
     "shadows": "Sombras",
-    "performance": "Modo rendimiento"
+    "performance": "Modo rendimiento",
+    "camera": "Cámara",
+    "copy": "Copiar",
+    "dofNear": "DOF desde (m)",
+    "dofFar": "DOF hasta (m)"
   },
   "error": {
     "title": "Algo ha fallado",

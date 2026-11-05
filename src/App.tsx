@@ -1,7 +1,8 @@
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
-import { LIGHTING } from './data/scene-config';
+import { CAMERA_LIMITS, LIGHTING } from './data/scene-config';
+import CameraTelemetry from './scene/CameraTelemetry';
 import Effects from './scene/Effects';
 import Scene from './scene/Scene';
 import Overlay from './ui/Overlay';
@@ -32,11 +33,14 @@ export default function App() {
         <OrbitControls
           makeDefault
           enableDamping
+          enablePan={false}
           target={[0, 0, 0]}
-          minDistance={400}
-          maxDistance={8000}
-          maxPolarAngle={Math.PI / 2.1}
+          minDistance={CAMERA_LIMITS.minDistance}
+          maxDistance={CAMERA_LIMITS.maxDistance}
+          minPolarAngle={CAMERA_LIMITS.minPolarAngle}
+          maxPolarAngle={CAMERA_LIMITS.maxPolarAngle}
         />
+        <CameraTelemetry />
       </Canvas>
       <Overlay />
     </>

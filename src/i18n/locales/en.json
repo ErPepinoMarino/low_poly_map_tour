@@ -16,7 +16,11 @@
     "vignette": "Vignette",
     "fog": "Fog",
     "shadows": "Shadows",
-    "performance": "Performance mode"
+    "performance": "Performance mode",
+    "camera": "Camera",
+    "copy": "Copy",
+    "dofNear": "DOF from (m)",
+    "dofFar": "DOF to (m)"
   },
   "error": {
     "title": "Something went wrong",

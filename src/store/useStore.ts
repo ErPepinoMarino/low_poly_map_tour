@@ -1,9 +1,19 @@
 import { create } from 'zustand';
+import { LIGHTING } from '../data/scene-config';
 
 export type UiState = 'free' | 'selected';
 export type LightMode = 'real' | 'day' | 'night' | 'manual';
 export type QualityTier = 'low' | 'high';
 export type EffectId = 'dof' | 'bloom' | 'vignette' | 'fog' | 'smaa' | 'shadows';
+
+export interface CameraInfo {
+  position: [number, number, number];
+  rotation: [number, number, number];
+  target: [number, number, number];
+  distance: number;
+  polar: number;
+  azimuth: number;
+}
 
 const isMobile =
   typeof window !== 'undefined' &&
@@ -18,6 +28,9 @@ interface AppState {
   lightMode: LightMode;
   manualHour: number;
   effects: Record<EffectId, boolean>;
+  dofNear: number;
+  dofFar: number;
+  cameraInfo: CameraInfo | null;
   performanceMode: boolean;
   qualityTier: QualityTier;
   openSignId: string | null;
@@ -30,6 +43,9 @@ interface AppState {
   setLightMode: (mode: LightMode) => void;
   setManualHour: (hour: number) => void;
   setEffect: (id: EffectId, enabled: boolean) => void;
+  setDofNear: (value: number) => void;
+  setDofFar: (value: number) => void;
+  setCameraInfo: (info: CameraInfo) => void;
   setPerformanceMode: (enabled: boolean) => void;
   setQualityTier: (tier: QualityTier) => void;
   openSign: (id: string) => void;
@@ -55,6 +71,9 @@ export const useStore = create<AppState>((set) => ({
     smaa: true,
     shadows: !isMobile,
   },
+  dofNear: LIGHTING.dof.near,
+  dofFar: LIGHTING.dof.far,
+  cameraInfo: null,
   performanceMode: false,
   qualityTier: isMobile ? 'low' : 'high',
   openSignId: null,
@@ -68,6 +87,10 @@ export const useStore = create<AppState>((set) => ({
   setManualHour: (manualHour) => set({ manualHour, lightMode: 'manual' }),
   setEffect: (id, enabled) =>
     set((s) => ({ effects: { ...s.effects, [id]: enabled } })),
+  setDofNear: (value) =>
+    set((s) => ({ dofNear: Math.max(20, Math.min(value, s.dofFar - 10)) })),
+  setDofFar: (value) => set((s) => ({ dofFar: Math.max(value, s.dofNear + 10) })),
+  setCameraInfo: (cameraInfo) => set({ cameraInfo }),
   setPerformanceMode: (performanceMode) => set({ performanceMode }),
   setQualityTier: (qualityTier) => set({ qualityTier }),
   openSign: (id) => set({ openSignId: id }),
