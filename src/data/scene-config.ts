@@ -57,11 +57,11 @@ export const LIGHTING = {
   dayHour: 10.5,
   nightHour: 22.5,
   fogDensity: 0.00032,
-  // Dirección artística de la luz (no la del sol real): sur-sureste, ~66°.
-  // Sombras hacia el norte-noroeste, visibles pero no extremas.
+  // Dirección artística de la luz (no la del sol real): sur-sureste, 40° fijo.
+  // Sombras largas y efectistas hacia el norte-noroeste (casa de 20 m → ~24 m).
   shadow: {
     azimuth: -0.35,
-    elevation: 1.05,
+    elevation: 0.698,
     mapSizeHigh: 4096,
     mapSizeLow: 2048,
     cameraSize: 900,
