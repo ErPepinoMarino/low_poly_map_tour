@@ -16,21 +16,23 @@ export const BBOX = {
 
 // Límites de órbita (zoom, inclinación, rotación).
 export const CAMERA_LIMITS = {
-  minDistance: 400,
-  maxDistance: 8000,
-  // Límites de inclinación pendientes de que el usuario los valide.
-  // NO se aplican todavía: se dejan sin restricción en OrbitControls.
+  minDistance: 20,
+  maxDistance: 3500,
+  // Inclinación libre hacia abajo; un margen de 0,1° impide mirar al horizonte/arriba.
   minPolarAngle: 0,
-  maxPolarAngle: Math.PI,
+  maxPolarAngle: Math.PI / 2 - (0.1 * Math.PI) / 180,
+  // Clamps absolutos de seguridad (CameraSafetyBounds).
+  minHeight: 30,
+  maxHeight: 3500,
+  maxHorizontalRadius: 3000,
   minAzimuthAngle: -Infinity,
   maxAzimuthAngle: Infinity,
 } as const;
 
-// Vista por defecto: sur → norte, 45°, apuntando al casco con el cerro al fondo.
-// Valores placeholder; se ajustan en Fase 2.
+// Vista inicial validada por el usuario (cámara baja, casi horizontal).
 export const DEFAULT_VIEW = {
-  position: [0, 0, 0] as const,
-  target: [0, 0, 0] as const,
+  position: [-376.5, 115.1, 561.2] as const,
+  target: [-43.5, 63.2, -15.7] as const,
 } as const;
 
 // Paleta "cozy" mediterránea — referencia consultable.
@@ -63,6 +65,7 @@ export const LIGHTING = {
   // Sombras largas que giran con la hora; se apagan de noche.
   shadow: {
     elevation: 0.698,
+    fadeRate: 1.2,
     mapSizeHigh: 4096,
     mapSizeLow: 2048,
     cameraSize: 900,
@@ -72,10 +75,14 @@ export const LIGHTING = {
     normalBias: 0.03,
   },
   dof: {
-    near: 500,
-    far: 1200,
-    maxBokeh: 4.0,
-    focusRange: 120,
+    near: 140,
+    far: 330,
+    autoDisableDistance: 900,
+    maxBokeh: 4,
+    nearBlurMultiplier: 5.0,
+    farBlurMultiplier: 1.7,
+    farBlurTransition: 180,
+    gizmoSize: 500,
     resolutionScale: 0.5,
   },
   colors: {

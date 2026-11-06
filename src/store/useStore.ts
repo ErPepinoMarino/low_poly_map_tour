@@ -13,6 +13,9 @@ export interface CameraInfo {
   distance: number;
   polar: number;
   azimuth: number;
+  terrainHeight: number | null;
+  terrainInside: boolean;
+  clearance: number | null;
 }
 
 const isMobile =
@@ -30,6 +33,7 @@ interface AppState {
   effects: Record<EffectId, boolean>;
   dofNear: number;
   dofFar: number;
+  showDofGuide: boolean;
   cameraInfo: CameraInfo | null;
   performanceMode: boolean;
   qualityTier: QualityTier;
@@ -45,6 +49,7 @@ interface AppState {
   setEffect: (id: EffectId, enabled: boolean) => void;
   setDofNear: (value: number) => void;
   setDofFar: (value: number) => void;
+  setShowDofGuide: (enabled: boolean) => void;
   setCameraInfo: (info: CameraInfo) => void;
   setPerformanceMode: (enabled: boolean) => void;
   setQualityTier: (tier: QualityTier) => void;
@@ -73,6 +78,7 @@ export const useStore = create<AppState>((set) => ({
   },
   dofNear: LIGHTING.dof.near,
   dofFar: LIGHTING.dof.far,
+  showDofGuide: false,
   cameraInfo: null,
   performanceMode: false,
   qualityTier: isMobile ? 'low' : 'high',
@@ -90,6 +96,7 @@ export const useStore = create<AppState>((set) => ({
   setDofNear: (value) =>
     set((s) => ({ dofNear: Math.max(20, Math.min(value, s.dofFar - 10)) })),
   setDofFar: (value) => set((s) => ({ dofFar: Math.max(value, s.dofNear + 10) })),
+  setShowDofGuide: (showDofGuide) => set({ showDofGuide }),
   setCameraInfo: (cameraInfo) => set({ cameraInfo }),
   setPerformanceMode: (performanceMode) => set({ performanceMode }),
   setQualityTier: (qualityTier) => set({ qualityTier }),

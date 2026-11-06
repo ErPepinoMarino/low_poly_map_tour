@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { LIGHTING } from '../data/scene-config';
@@ -72,8 +72,9 @@ export default function SunMoon() {
   const shadowsEnabled = useStore((s) => s.effects.shadows);
   const performanceMode = useStore((s) => s.performanceMode);
   const qualityTier = useStore((s) => s.qualityTier);
-  // De noche no tiene sentido proyectar sombras: se apagan al bajar el sol.
-  const shadowsOn = shadowsEnabled && !performanceMode && time.sunAltitude > -0.02;
+  const [shadowPassEnabled, setShadowPassEnabled] = useState(
+    () => shadowsEnabled && !performanceMode && time.nightFactor < 0.999,
+  );
   const shadowSize =
     qualityTier === 'low' ? LIGHTING.shadow.mapSizeLow : LIGHTING.shadow.mapSizeHigh;
 
@@ -87,6 +88,25 @@ export default function SunMoon() {
     const daylight = 1 - time.nightFactor;
     const altitude = time.sunAltitude;
     const isNight = altitude < -0.02;
+    const shadowRequested = shadowsEnabled && !performanceMode;
+    const targetShadowIntensity = shadowRequested ? 1 - time.nightFactor : 0;
+    const shadowDelta = Math.min(delta, 1 / 30);
+    if (!shadowPassEnabled) {
+      sun.shadow.intensity = 0;
+      if (targetShadowIntensity > 0.005) setShadowPassEnabled(true);
+    } else {
+      sun.shadow.intensity = instant
+        ? targetShadowIntensity
+        : THREE.MathUtils.damp(
+            sun.shadow.intensity,
+            targetShadowIntensity,
+            LIGHTING.shadow.fadeRate,
+            shadowDelta,
+          );
+      if (targetShadowIntensity <= 0.005 && sun.shadow.intensity <= 0.005) {
+        setShadowPassEnabled(false);
+      }
+    }
 
     // Elevación fija 40° (sombras largas) + azimut real del sol/luna: la sombra gira
     // con la hora. De noche las sombras se apagan, así que solo importa la luz.
@@ -186,7 +206,7 @@ export default function SunMoon() {
         color={LIGHTING.colors.sunDay}
         intensity={LIGHTING.intensities.sunDay}
         position={[2000, 3000, 1500]}
-        castShadow={shadowsOn}
+        castShadow={shadowPassEnabled}
         shadow-mapSize={[shadowSize, shadowSize]}
         shadow-camera-left={-LIGHTING.shadow.cameraSize}
         shadow-camera-right={LIGHTING.shadow.cameraSize}

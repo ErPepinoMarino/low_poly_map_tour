@@ -26,30 +26,27 @@ function formatHour(hour: number): string {
 
 const fmtVec = (v: [number, number, number]) => v.map((n) => n.toFixed(1)).join(', ');
 
-function smoothstep(edge0: number, edge1: number, x: number): number {
-  const t = Math.min(1, Math.max(0, (x - edge0) / (edge1 - edge0)));
-  return t * t * (3 - 2 * t);
-}
-
-// Estado en vivo del DOF: distancia actual y si cae dentro del rango configurado.
+// Live readout of the camera-relative sharp band.
 function DofStatus() {
   const { t } = useTranslation();
   const effects = useStore((s) => s.effects);
   const performanceMode = useStore((s) => s.performanceMode);
   const dofNear = useStore((s) => s.dofNear);
   const dofFar = useStore((s) => s.dofFar);
-  const distance = useStore((s) => s.cameraInfo?.distance ?? null);
+  const cameraDistance = useStore((s) => s.cameraInfo?.distance ?? null);
 
-  if (distance === null) return <div className="hud-dof-status">…</div>;
-
-  const active = effects.dof && !performanceMode && distance < dofFar;
-  const strength = 1 - smoothstep(dofNear, dofFar, distance);
+  const requested = effects.dof && !performanceMode;
+  const autoDisabled =
+    requested && cameraDistance !== null && cameraDistance > LIGHTING.dof.autoDisableDistance;
+  const active = requested && !autoDisabled;
 
   return (
     <div className={`hud-dof-status${active ? ' active' : ''}`}>
-      {active
-        ? `${t('hud.dofActive')} · ${t('hud.dofStrength')} ${strength.toFixed(2)} · ${distance.toFixed(0)} m`
-        : `${t('hud.dofOff')} · ${distance.toFixed(0)} m`}
+      {autoDisabled
+        ? `${t('hud.dofAutoOff')} · ${cameraDistance?.toFixed(0)} m`
+        : active
+        ? `${t('hud.dofActive')} · ${t('hud.dofBand')} ${dofNear}–${dofFar} m`
+        : `${t('hud.dofOff')} · ${dofNear}–${dofFar} m`}
     </div>
   );
 }
@@ -82,6 +79,11 @@ function CameraPanel() {
             dist {cameraInfo.distance.toFixed(1)} m · polar {cameraInfo.polar.toFixed(1)}° · azim{' '}
             {cameraInfo.azimuth.toFixed(1)}°
           </div>
+          <div className="hud-mono">
+            {cameraInfo.terrainHeight === null
+              ? t('hud.cameraNoTerrainData')
+              : `${t(cameraInfo.terrainInside ? 'hud.ground' : 'hud.nearestTerrain')} ${cameraInfo.terrainHeight.toFixed(1)} m · ${t('hud.clearance')} ${cameraInfo.clearance?.toFixed(1)} m`}
+          </div>
           <button type="button" onClick={() => copyCamera(cameraInfo)}>
             {t('hud.copy')}
           </button>
@@ -107,6 +109,8 @@ export default function Overlay() {
   const dofFar = useStore((s) => s.dofFar);
   const setDofNear = useStore((s) => s.setDofNear);
   const setDofFar = useStore((s) => s.setDofFar);
+  const showDofGuide = useStore((s) => s.showDofGuide);
+  const setShowDofGuide = useStore((s) => s.setShowDofGuide);
   const performanceMode = useStore((s) => s.performanceMode);
   const setPerformanceMode = useStore((s) => s.setPerformanceMode);
   const time = useTimeOfDay();
@@ -194,7 +198,18 @@ export default function Overlay() {
             />
             {t('hud.performance')}
           </label>
+          <label className="hud-check">
+            <input
+              type="checkbox"
+              checked={showDofGuide}
+              onChange={(e) => setShowDofGuide(e.target.checked)}
+            />
+            {t('hud.dofGuide')}
+          </label>
         </div>
+        {effects.shadows && time.sunAltitude <= -0.02 ? (
+          <div className="hud-dof-status">{t('hud.shadowsNight')}</div>
+        ) : null}
 
         <div className="hud-dof-range">
           <label>
@@ -221,6 +236,8 @@ export default function Overlay() {
           </label>
         </div>
         <DofStatus />
+        <div className="hud-dof-explanation">{t('hud.dofZoomHelp')}</div>
+        <div className="hud-dof-explanation">{t('hud.dofGuideHelp')}</div>
       </section>
 
       <CameraPanel />

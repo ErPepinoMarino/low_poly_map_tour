@@ -163,6 +163,23 @@
   opacity: 1;
 }
 
+.hud-dof-explanation {
+  font-size: 10px;
+  line-height: 1.35;
+  opacity: 0.65;
+}
+
+.dof-gizmo-label {
+  padding: 3px 6px;
+  border: 1px solid;
+  border-radius: 4px;
+  background: rgba(14, 18, 22, 0.88);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+  font: 600 11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 @media (max-width: 600px) {
   .hud {
     padding: 10px;

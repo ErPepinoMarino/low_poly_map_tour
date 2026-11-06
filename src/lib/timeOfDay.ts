@@ -86,13 +86,14 @@ export function getTimeState(date: Date): TimeState {
   };
 }
 
-// Dirección del sol/luna en coordenadas locales: X = este, Y = arriba, Z = sur.
-// SunCalc mide el azimuth desde el sur hacia el oeste.
+// Dirección desde el observador hacia el sol/luna en coordenadas locales:
+// X = este, Y = arriba, Z = sur. SunCalc 2.x mide azimuth en grados, horario
+// desde el norte; aquí recibe radianes ya convertidos por getTimeState().
 export function directionFromAltAz(altitude: number, azimuth: number): THREE.Vector3 {
   const cosAlt = Math.cos(altitude);
   return new THREE.Vector3(
-    -Math.sin(azimuth) * cosAlt,
+    Math.sin(azimuth) * cosAlt,
     Math.sin(altitude),
-    Math.cos(azimuth) * cosAlt,
+    -Math.cos(azimuth) * cosAlt,
   );
 }
