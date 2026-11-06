@@ -31,8 +31,8 @@ export const CAMERA_LIMITS = {
 
 // Vista inicial validada por el usuario (cámara baja, casi horizontal).
 export const DEFAULT_VIEW = {
-  position: [-376.5, 115.1, 561.2] as const,
-  target: [-43.5, 63.2, -15.7] as const,
+  position: [-635.7, 542.4, 746.3] as const,
+  target: [110.8, -27.2, -86.0] as const,
 } as const;
 
 // Paleta "cozy" mediterránea — referencia consultable.
@@ -77,7 +77,7 @@ export const LIGHTING = {
   dof: {
     near: 140,
     far: 330,
-    autoDisableDistance: 900,
+    autoDisableDistance: 800,
     maxBokeh: 4,
     nearBlurMultiplier: 5.0,
     farBlurMultiplier: 1.7,

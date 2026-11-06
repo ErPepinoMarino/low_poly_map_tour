@@ -107,7 +107,12 @@ function DofPlane({
 
   return (
     <group ref={groupRef}>
-      <mesh renderOrder={998} castShadow={false} receiveShadow={false}>
+      <mesh
+        renderOrder={998}
+        castShadow={false}
+        receiveShadow={false}
+        userData={{ excludeFromSceneStats: true }}
+      >
         <planeGeometry args={[1, 1]} />
         <meshBasicMaterial
           color={color}

@@ -4,7 +4,9 @@ import * as THREE from 'three';
 import { CAMERA_LIMITS, DEFAULT_VIEW, LIGHTING } from './data/scene-config';
 import CameraTelemetry from './scene/CameraTelemetry';
 import CameraSafetyBounds from './scene/CameraSafetyBounds';
+import CameraReset from './scene/CameraReset';
 import Effects from './scene/Effects';
+import SceneStats from './scene/SceneStats';
 import Scene from './scene/Scene';
 import Overlay from './ui/Overlay';
 import { useStore } from './store/useStore';
@@ -40,8 +42,10 @@ export default function App() {
           minPolarAngle={CAMERA_LIMITS.minPolarAngle}
           maxPolarAngle={CAMERA_LIMITS.maxPolarAngle}
         />
+        <CameraReset />
         <CameraSafetyBounds />
         <CameraTelemetry />
+        <SceneStats />
       </Canvas>
       <Overlay />
     </>

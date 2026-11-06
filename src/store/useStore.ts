@@ -18,6 +18,15 @@ export interface CameraInfo {
   clearance: number | null;
 }
 
+export interface SceneStats {
+  meshes: number;
+  triangles: number;
+  geometries: number;
+  materials: number;
+  textures: number;
+  drawCalls: number;
+}
+
 const isMobile =
   typeof window !== 'undefined' &&
   (window.matchMedia('(max-width: 768px)').matches ||
@@ -35,6 +44,8 @@ interface AppState {
   dofFar: number;
   showDofGuide: boolean;
   cameraInfo: CameraInfo | null;
+  sceneStats: SceneStats | null;
+  cameraResetRequest: number;
   performanceMode: boolean;
   qualityTier: QualityTier;
   openSignId: string | null;
@@ -51,6 +62,7 @@ interface AppState {
   setDofFar: (value: number) => void;
   setShowDofGuide: (enabled: boolean) => void;
   setCameraInfo: (info: CameraInfo) => void;
+  setSceneStats: (stats: SceneStats) => void;
   setPerformanceMode: (enabled: boolean) => void;
   setQualityTier: (tier: QualityTier) => void;
   openSign: (id: string) => void;
@@ -80,6 +92,8 @@ export const useStore = create<AppState>((set) => ({
   dofFar: LIGHTING.dof.far,
   showDofGuide: false,
   cameraInfo: null,
+  sceneStats: null,
+  cameraResetRequest: 0,
   performanceMode: false,
   qualityTier: isMobile ? 'low' : 'high',
   openSignId: null,
@@ -98,10 +112,11 @@ export const useStore = create<AppState>((set) => ({
   setDofFar: (value) => set((s) => ({ dofFar: Math.max(value, s.dofNear + 10) })),
   setShowDofGuide: (showDofGuide) => set({ showDofGuide }),
   setCameraInfo: (cameraInfo) => set({ cameraInfo }),
+  setSceneStats: (sceneStats) => set({ sceneStats }),
   setPerformanceMode: (performanceMode) => set({ performanceMode }),
   setQualityTier: (qualityTier) => set({ qualityTier }),
   openSign: (id) => set({ openSignId: id }),
   closeSign: () => set({ openSignId: null }),
-  resetCamera: () => {},
+  resetCamera: () => set((state) => ({ cameraResetRequest: state.cameraResetRequest + 1 })),
   setExtra: (id, enabled) => set((s) => ({ extras: { ...s.extras, [id]: enabled } })),
 }));
