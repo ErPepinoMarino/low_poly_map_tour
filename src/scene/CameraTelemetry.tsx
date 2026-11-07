@@ -2,11 +2,13 @@ import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
+import { DIORAMA_CENTER } from '../data/scene-config';
 import { getTerrainHeightIndex } from '../lib/terrainHeight';
 import { useStore } from '../store/useStore';
 
 const TERRAIN_URL = `${import.meta.env.BASE_URL}models/terrain.glb`;
 const cameraWorld = new THREE.Vector3();
+const dioramaCenter = new THREE.Vector3(...DIORAMA_CENTER);
 
 interface OrbitControlsLike {
   target: THREE.Vector3;
@@ -14,7 +16,7 @@ interface OrbitControlsLike {
   getAzimuthalAngle: () => number;
 }
 
-// Camera debug telemetry and local terrain-clearance readout (15 Hz).
+// Camera debug telemetry, orbit-target distance and diorama-center distance (15 Hz).
 export default function CameraTelemetry() {
   const { scene: terrainScene } = useGLTF(TERRAIN_URL);
   const terrain = getTerrainHeightIndex(terrainScene);
@@ -43,6 +45,7 @@ export default function CameraTelemetry() {
       ],
       target: [target.x, target.y, target.z],
       distance: cameraWorld.distanceTo(target),
+      centerDistance: cameraWorld.distanceTo(dioramaCenter),
       polar: controls ? THREE.MathUtils.radToDeg(controls.getPolarAngle()) : 0,
       azimuth: controls ? THREE.MathUtils.radToDeg(controls.getAzimuthalAngle()) : 0,
       terrainHeight,

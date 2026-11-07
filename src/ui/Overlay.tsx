@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LIGHTING } from '../data/scene-config';
 import { useTimeOfDay } from '../lighting/useTimeOfDay';
@@ -19,7 +19,7 @@ function formatClock(hour: number, language: string): string {
   const hour24 = Math.floor(totalMinutes / 60);
   const minute = totalMinutes % 60;
   const hour12 = hour24 % 12 || 12;
-  const suffix = language === 'en' ? (hour24 < 12 ? 'AM' : 'PM') : (hour24 < 12 ? 'am' : 'pm');
+  const suffix = language === 'en' ? (hour24 < 12 ? 'AM' : 'PM') : hour24 < 12 ? 'am' : 'pm';
   return `${String(hour12).padStart(2, '0')}:${String(minute).padStart(2, '0')} ${suffix}`;
 }
 
@@ -155,27 +155,19 @@ export default function Overlay() {
   const setPerformanceMode = useStore((state) => state.setPerformanceMode);
   const [infoOpen, setInfoOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
-  const infoRef = useRef<HTMLDivElement>(null);
-  const optionsRef = useRef<HTMLDivElement>(null);
 
+  // Los menús solo se cierran con su interruptor o con Escape. No se cierran
+  // al orbitar/panear ni al hacer clic fuera: así se puede leer la telemetría
+  // en tiempo real mientras se mueve la cámara.
   useEffect(() => {
-    const onPointerDown = (event: PointerEvent) => {
-      const target = event.target as Node;
-      if (!infoRef.current?.contains(target)) setInfoOpen(false);
-      if (!optionsRef.current?.contains(target)) setOptionsOpen(false);
-    };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         setInfoOpen(false);
         setOptionsOpen(false);
       }
     };
-    document.addEventListener('pointerdown', onPointerDown);
     document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown);
-    };
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, []);
 
   return (
@@ -184,7 +176,7 @@ export default function Overlay() {
         <TimePanel />
       </div>
 
-      <div className="hud-top-right" ref={infoRef}>
+      <div className="hud-top-right">
         <button
           type="button"
           className={`hud-menu-button${infoOpen ? ' open' : ''}`}
@@ -195,12 +187,14 @@ export default function Overlay() {
           }}
         >
           <span>{t('hud.nerdInfo')}</span>
-          <span className={`menu-switch${infoOpen ? ' on' : ''}`} aria-hidden="true"><i /></span>
+          <span className={`menu-switch${infoOpen ? ' on' : ''}`} aria-hidden="true">
+            <i />
+          </span>
         </button>
         {infoOpen ? <NerdInfoPanel /> : null}
       </div>
 
-      <div className="hud-options" ref={optionsRef}>
+      <div className="hud-options">
         {optionsOpen ? (
           <section className="hud-menu-panel options-panel">
             <div className="hud-menu-heading">
@@ -226,7 +220,6 @@ export default function Overlay() {
                 {t('hud.performance')}
               </label>
             </div>
-
           </section>
         ) : null}
         <button
@@ -240,7 +233,9 @@ export default function Overlay() {
         >
           <OptionsIcon />
           <span>{t('hud.options')}</span>
-          <span className={`menu-switch${optionsOpen ? ' on' : ''}`} aria-hidden="true"><i /></span>
+          <span className={`menu-switch${optionsOpen ? ' on' : ''}`} aria-hidden="true">
+            <i />
+          </span>
         </button>
       </div>
     </div>
@@ -256,9 +251,14 @@ function NerdInfoPanel() {
   const dofFar = useStore((state) => state.dofFar);
   const showDofGuide = useStore((state) => state.showDofGuide);
   const setShowDofGuide = useStore((state) => state.setShowDofGuide);
+  const showCameraGizmo = useStore((state) => state.showCameraGizmo);
+  const setShowCameraGizmo = useStore((state) => state.setShowCameraGizmo);
   const performanceMode = useStore((state) => state.performanceMode);
   const dofRequested = effects.dof && !performanceMode;
-  const autoDisabled = dofRequested && cameraInfo !== null && cameraInfo.distance > LIGHTING.dof.autoDisableDistance;
+  const autoDisabled =
+    dofRequested &&
+    cameraInfo !== null &&
+    cameraInfo.centerDistance > LIGHTING.dof.autoDisableDistance;
   const dofActive = dofRequested && cameraInfo !== null && !autoDisabled;
   const formatNumber = (value: number) => value.toLocaleString(i18n.language);
 
@@ -275,30 +275,52 @@ function NerdInfoPanel() {
             <div className="hud-mono">pos [{formatVector(cameraInfo.position)}]</div>
             <div className="hud-mono">rot [{formatVector(cameraInfo.rotation)}]°</div>
             <div className="hud-mono">target [{formatVector(cameraInfo.target)}]</div>
-            <div className="hud-mono">{t('hud.distance')} {cameraInfo.distance.toFixed(1)} m · polar {cameraInfo.polar.toFixed(1)}° · azim {cameraInfo.azimuth.toFixed(1)}°</div>
+            <div className="hud-mono">
+              {t('hud.distance')} {cameraInfo.distance.toFixed(1)} m · polar{' '}
+              {cameraInfo.polar.toFixed(1)}° · azim {cameraInfo.azimuth.toFixed(1)}°
+            </div>
+            <div className="hud-mono">
+              {t('hud.centerDistance')} {cameraInfo.centerDistance.toFixed(1)} m ·{' '}
+              {t('hud.clearance')} {cameraInfo.clearance?.toFixed(1) ?? '—'} m
+            </div>
             <div className="hud-mono">
               {cameraInfo.terrainHeight === null
                 ? t('hud.cameraNoTerrainData')
-                : `${t(cameraInfo.terrainInside ? 'hud.ground' : 'hud.nearestTerrain')} ${cameraInfo.terrainHeight.toFixed(1)} m · ${t('hud.clearance')} ${cameraInfo.clearance?.toFixed(1)} m`}
+                : `${t(cameraInfo.terrainInside ? 'hud.ground' : 'hud.nearestTerrain')} ${cameraInfo.terrainHeight.toFixed(1)} m`}
             </div>
+            <label className="hud-check nerd-guide-toggle">
+              <input
+                type="checkbox"
+                checked={showCameraGizmo}
+                onChange={(event) => setShowCameraGizmo(event.target.checked)}
+              />
+              {t('hud.cameraGizmo')}
+            </label>
           </>
-        ) : <div className="hud-mono">…</div>}
+        ) : (
+          <div className="hud-mono">…</div>
+        )}
       </div>
 
       <div className="nerd-section">
         <div className="nerd-section-title">{t('hud.dof')}</div>
         <div className="hud-mono">
           {autoDisabled
-            ? `${t('hud.dofAutoOff')} · ${cameraInfo?.distance.toFixed(0)} m`
+            ? `${t('hud.dofAutoOff')} · ${t('hud.centerDistance')} ${cameraInfo?.centerDistance.toFixed(0)} m`
             : dofActive
               ? `${t('hud.dofActive')} · ${t('hud.dofBand')} ${dofNear}–${dofFar} m`
               : t('hud.dofOff')}
         </div>
         <div className="hud-mono">
-          {t('hud.dofAutoLimit')}: {LIGHTING.dof.autoDisableDistance.toLocaleString(i18n.language)} m · {t('hud.dofFarBlur')}: ×{LIGHTING.dof.farBlurMultiplier.toFixed(1)}
+          {t('hud.dofAutoLimit')}: {LIGHTING.dof.autoDisableDistance.toLocaleString(i18n.language)}{' '}
+          m · {t('hud.dofFarBlur')}: ×{LIGHTING.dof.farBlurMultiplier.toFixed(1)}
         </div>
         <label className="hud-check nerd-guide-toggle">
-          <input type="checkbox" checked={showDofGuide} onChange={(event) => setShowDofGuide(event.target.checked)} />
+          <input
+            type="checkbox"
+            checked={showDofGuide}
+            onChange={(event) => setShowDofGuide(event.target.checked)}
+          />
           {t('hud.dofGuide')}
         </label>
       </div>
@@ -307,13 +329,20 @@ function NerdInfoPanel() {
         <div className="nerd-section-title">{t('hud.sceneStats')}</div>
         {stats ? (
           <div className="nerd-stats-grid">
-            <span>{t('hud.triangles')}</span><strong>{formatNumber(stats.triangles)}</strong>
-            <span>{t('hud.drawCalls')}</span><strong>~{formatNumber(stats.drawCalls)}</strong>
-            <span>{t('hud.meshes')}</span><strong>{formatNumber(stats.meshes)}</strong>
-            <span>{t('hud.materials')}</span><strong>{formatNumber(stats.materials)}</strong>
-            <span>{t('hud.textures')}</span><strong>{formatNumber(stats.textures)}</strong>
+            <span>{t('hud.triangles')}</span>
+            <strong>{formatNumber(stats.triangles)}</strong>
+            <span>{t('hud.drawCalls')}</span>
+            <strong>~{formatNumber(stats.drawCalls)}</strong>
+            <span>{t('hud.meshes')}</span>
+            <strong>{formatNumber(stats.meshes)}</strong>
+            <span>{t('hud.materials')}</span>
+            <strong>{formatNumber(stats.materials)}</strong>
+            <span>{t('hud.textures')}</span>
+            <strong>{formatNumber(stats.textures)}</strong>
           </div>
-        ) : <div className="hud-mono">{t('hud.measuring')}</div>}
+        ) : (
+          <div className="hud-mono">{t('hud.measuring')}</div>
+        )}
       </div>
     </section>
   );

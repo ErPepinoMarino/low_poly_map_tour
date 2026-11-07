@@ -433,7 +433,8 @@
   line-height: 1.4;
 }
 
-.dof-gizmo-label {
+.dof-gizmo-label,
+.camera-gizmo-label {
   padding: 3px 6px;
   border: 1px solid;
   border-radius: 4px;

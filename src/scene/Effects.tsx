@@ -1,20 +1,15 @@
 import { useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import {
-  Bloom,
-  DepthOfField,
-  EffectComposer,
-  SMAA,
-  Vignette,
-} from '@react-three/postprocessing';
+import { Bloom, DepthOfField, EffectComposer, SMAA, Vignette } from '@react-three/postprocessing';
 import { useTranslation } from 'react-i18next';
 import type { DepthOfFieldEffect } from 'postprocessing';
 import * as THREE from 'three';
 import { LIGHTING } from '../data/scene-config';
 import { useStore } from '../store/useStore';
 
-const CAMERA_FOCUS_BAND = /float signedDistance=distance-focusDistance;float magnitude=smoothstep\(0\.0,focusRange,abs\(signedDistance\)\);gl_FragColor\.rg=magnitude\*vec2\(step\(signedDistance,0\.0\),step\(0\.0,signedDistance\)\);/;
+const CAMERA_FOCUS_BAND =
+  /float signedDistance=distance-focusDistance;float magnitude=smoothstep\(0\.0,focusRange,abs\(signedDistance\)\);gl_FragColor\.rg=magnitude\*vec2\(step\(signedDistance,0\.0\),step\(0\.0,signedDistance\)\);/;
 
 function patchCameraFocusBand(material: THREE.ShaderMaterial, near: number, far: number) {
   if (!material.userData.cameraFocusBandPatched) {
@@ -63,12 +58,8 @@ function patchCameraFocusBand(material: THREE.ShaderMaterial, near: number, far:
 }
 
 const FRAME_VERTICES = new Float32Array([
-  -0.5, -0.5, 0, 0.5, -0.5, 0,
-  0.5, -0.5, 0, 0.5, 0.5, 0,
-  0.5, 0.5, 0, -0.5, 0.5, 0,
-  -0.5, 0.5, 0, -0.5, -0.5, 0,
-  -0.5, 0, 0, 0.5, 0, 0,
-  0, -0.5, 0, 0, 0.5, 0,
+  -0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0, 0.5, 0.5, 0, -0.5, 0.5, 0, -0.5, 0.5, 0,
+  -0.5, -0.5, 0, -0.5, 0, 0, 0.5, 0, 0, 0, -0.5, 0, 0, 0.5, 0,
 ]);
 
 function DofPlane({
@@ -155,15 +146,15 @@ export default function Effects() {
   const performanceMode = useStore((state) => state.performanceMode);
   const dofNear = useStore((state) => state.dofNear);
   const dofFar = useStore((state) => state.dofFar);
-  const cameraDistance = useStore((state) => state.cameraInfo?.distance ?? Infinity);
+  // El autoapagado usa la distancia al centro del diorama, no al target de
+  // OrbitControls: el target se mueve con el pan y puede estar al otro extremo.
+  const centerDistance = useStore((state) => state.cameraInfo?.centerDistance ?? Infinity);
   const showDofGuide = useStore((state) => state.showDofGuide);
   const near = Math.max(20, dofNear);
   const far = Math.max(near + 10, dofFar);
   const dofRef = useRef<DepthOfFieldEffect>(null);
   const dofEnabled =
-    effects.dof &&
-    !performanceMode &&
-    cameraDistance <= LIGHTING.dof.autoDisableDistance;
+    effects.dof && !performanceMode && centerDistance <= LIGHTING.dof.autoDisableDistance;
 
   useFrame(() => {
     const dof = dofRef.current;

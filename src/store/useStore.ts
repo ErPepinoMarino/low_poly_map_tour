@@ -10,7 +10,8 @@ export interface CameraInfo {
   position: [number, number, number];
   rotation: [number, number, number];
   target: [number, number, number];
-  distance: number;
+  distance: number; // distancia al target de OrbitControls (órbita)
+  centerDistance: number; // distancia al centro del diorama, usada por el DOF
   polar: number;
   azimuth: number;
   terrainHeight: number | null;
@@ -43,6 +44,7 @@ interface AppState {
   dofNear: number;
   dofFar: number;
   showDofGuide: boolean;
+  showCameraGizmo: boolean;
   cameraInfo: CameraInfo | null;
   sceneStats: SceneStats | null;
   cameraResetRequest: number;
@@ -61,6 +63,7 @@ interface AppState {
   setDofNear: (value: number) => void;
   setDofFar: (value: number) => void;
   setShowDofGuide: (enabled: boolean) => void;
+  setShowCameraGizmo: (enabled: boolean) => void;
   setCameraInfo: (info: CameraInfo) => void;
   setSceneStats: (stats: SceneStats) => void;
   setPerformanceMode: (enabled: boolean) => void;
@@ -91,6 +94,7 @@ export const useStore = create<AppState>((set) => ({
   dofNear: LIGHTING.dof.near,
   dofFar: LIGHTING.dof.far,
   showDofGuide: false,
+  showCameraGizmo: false,
   cameraInfo: null,
   sceneStats: null,
   cameraResetRequest: 0,
@@ -105,12 +109,11 @@ export const useStore = create<AppState>((set) => ({
   setLanguage: (language) => set({ language }),
   setLightMode: (lightMode) => set({ lightMode }),
   setManualHour: (manualHour) => set({ manualHour, lightMode: 'manual' }),
-  setEffect: (id, enabled) =>
-    set((s) => ({ effects: { ...s.effects, [id]: enabled } })),
-  setDofNear: (value) =>
-    set((s) => ({ dofNear: Math.max(20, Math.min(value, s.dofFar - 10)) })),
+  setEffect: (id, enabled) => set((s) => ({ effects: { ...s.effects, [id]: enabled } })),
+  setDofNear: (value) => set((s) => ({ dofNear: Math.max(20, Math.min(value, s.dofFar - 10)) })),
   setDofFar: (value) => set((s) => ({ dofFar: Math.max(value, s.dofNear + 10) })),
   setShowDofGuide: (showDofGuide) => set({ showDofGuide }),
+  setShowCameraGizmo: (showCameraGizmo) => set({ showCameraGizmo }),
   setCameraInfo: (cameraInfo) => set({ cameraInfo }),
   setSceneStats: (sceneStats) => set({ sceneStats }),
   setPerformanceMode: (performanceMode) => set({ performanceMode }),

@@ -2,6 +2,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { CAMERA_LIMITS, DEFAULT_VIEW, LIGHTING } from './data/scene-config';
+import CameraGizmo from './scene/CameraGizmo';
 import CameraTelemetry from './scene/CameraTelemetry';
 import CameraSafetyBounds from './scene/CameraSafetyBounds';
 import CameraReset from './scene/CameraReset';
@@ -45,6 +46,7 @@ export default function App() {
         <CameraReset />
         <CameraSafetyBounds />
         <CameraTelemetry />
+        <CameraGizmo />
         <SceneStats />
       </Canvas>
       <Overlay />

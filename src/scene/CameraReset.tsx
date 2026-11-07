@@ -22,6 +22,7 @@ interface ResetTween {
 
 const DEFAULT_POSITION = new THREE.Vector3(...DEFAULT_VIEW.position);
 const DEFAULT_TARGET = new THREE.Vector3(...DEFAULT_VIEW.target);
+const RESET_DURATION_SECONDS = 3.2;
 
 export default function CameraReset() {
   const camera = useThree((state) => state.camera);
@@ -64,7 +65,7 @@ export default function CameraReset() {
     if (!current) return;
 
     current.elapsed += delta;
-    const progress = Math.min(1, current.elapsed / 0.9);
+    const progress = Math.min(1, current.elapsed / RESET_DURATION_SECONDS);
     const eased = 1 - (1 - progress) ** 3;
     activeCamera.position.lerpVectors(current.fromPosition, DEFAULT_POSITION, eased);
     activeControls.target.lerpVectors(current.fromTarget, DEFAULT_TARGET, eased);
