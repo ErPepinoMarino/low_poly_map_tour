@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "fetch:dem": "node scripts/fetch_dem.mjs",
     "build:terrain": "node scripts/build_terrain.mjs",
+    "prepare:lights": "node scripts/prepare_lights.mjs",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

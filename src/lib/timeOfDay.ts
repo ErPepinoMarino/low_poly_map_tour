@@ -1,4 +1,4 @@
-import { getMoonPosition, getPosition } from 'suncalc';
+import { getMoonPosition, getPosition, getTimes } from 'suncalc';
 import * as THREE from 'three';
 import { TOWN } from '../data/scene-config';
 
@@ -13,6 +13,8 @@ export interface TimeState {
   moonAltitude: number;
   moonAzimuth: number;
   nightFactor: number; // 0 = día, 1 = noche
+  duskHour: number; // anochecer civil, hora local decimal
+  dawnHour: number; // amanecer civil, hora local decimal
 }
 
 const TOWN_PARTS = new Intl.DateTimeFormat('en-GB', {
@@ -38,7 +40,14 @@ function smoothstep(edge0: number, edge1: number, x: number): number {
   return t * t * (3 - 2 * t);
 }
 
-export function getTownParts(date: Date): { year: number; month: number; day: number; hour: number; minute: number; second: number } {
+export function getTownParts(date: Date): {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  second: number;
+} {
   const parts = TOWN_PARTS.formatToParts(date);
   const get = (type: string) => Number(parts.find((p) => p.type === type)?.value ?? 0);
   return {
@@ -55,6 +64,12 @@ export function formatTownTime(date: Date): string {
   return TOWN_CLOCK.format(date);
 }
 
+function decimalTownHour(date: Date | null | undefined, fallback: number): number {
+  if (!date || Number.isNaN(date.getTime())) return fallback;
+  const parts = getTownParts(date);
+  return parts.hour + parts.minute / 60 + parts.second / 3600;
+}
+
 // Construye un Date que, visto en Europe/Madrid, cae a la hora indicada del día
 // actual del pueblo. El offset se toma del día actual (suficiente para el diorama).
 export function dateAtTownHour(hour: number, base = new Date()): Date {
@@ -69,6 +84,7 @@ export function dateAtTownHour(hour: number, base = new Date()): Date {
 export function getTimeState(date: Date): TimeState {
   const sun = getPosition(date, TOWN.lat, TOWN.lon);
   const moon = getMoonPosition(date, TOWN.lat, TOWN.lon);
+  const times = getTimes(date, TOWN.lat, TOWN.lon);
   const p = getTownParts(date);
   // SunCalc 2.x devuelve grados; el resto del código trabaja en radianes.
   const sunAltitude = (sun.altitude * Math.PI) / 180;
@@ -83,6 +99,8 @@ export function getTimeState(date: Date): TimeState {
     moonAzimuth: (moon.azimuth * Math.PI) / 180,
     // 0 con sol alto, 1 con sol por debajo de ~-7°; transición suave en el crepúsculo.
     nightFactor: 1 - smoothstep(-0.12, 0.08, sunAltitude),
+    duskHour: decimalTownHour(times.dusk, 18.5),
+    dawnHour: decimalTownHour(times.dawn, 6.5),
   };
 }
 

@@ -1,6 +1,7 @@
 import type { Object3D } from 'three';
 import { setupRoadMaterials } from './roadMaterials';
 import { setupHouseMaterials } from './houseMaterials';
+import { setupWindowMaterials } from './windowMaterials';
 
 // Aplica a CUALQUIER escena los materiales conocidos por nombre.
 //
@@ -11,4 +12,5 @@ import { setupHouseMaterials } from './houseMaterials';
 export function setupNamedMaterials(scene: Object3D) {
   setupRoadMaterials(scene);
   setupHouseMaterials(scene);
+  setupWindowMaterials(scene);
 }
