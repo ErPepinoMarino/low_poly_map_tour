@@ -1,8 +1,9 @@
 // Clasificación de la cobertura del suelo → colores por zona (vertex colors).
 //
-// Colores base de la paleta "cozy" (desaturada), en RGB 0-1:
-//   agua #3E7C9E · playa #E4D3B0 · acantilado #A39B8B · urbano #C9B08A
-//   bosque #6B7A4A · matorral #9A9160 · campo #8A9A5B (por defecto)
+// Paleta mediterránea cálida y saturada, alineada con los materiales del diorama
+// (teja terracota, muro crema, campos dorados). Colores base en RGB 0-1:
+//   agua #2F8194 · playa #EED6A5 · acantilado #B49A7B · urbano #D8BF8C
+//   bosque #667334 · matorral #B39250 · campo #8F9B42 (por defecto)
 //
 // El campo es el color por defecto (huerta/naranjos que rodean el casco):
 // solo clasificamos las zonas con un color propio; el resto cae en "campo".
@@ -11,20 +12,52 @@ import { readFile } from 'node:fs/promises';
 import { toLocalMeters } from './geo.mjs';
 
 const ZONES = [
-  { id: 'water', prio: 6, color: [0.243, 0.486, 0.62], natural: ['water', 'bay'], landuse: ['reservoir', 'basin'] },
-  { id: 'beach', prio: 5, color: [0.894, 0.827, 0.69], natural: ['beach', 'sand', 'dune'], landuse: [] },
-  { id: 'cliff', prio: 4, color: [0.639, 0.608, 0.545], natural: ['cliff', 'bare_rock', 'rock', 'scree'], landuse: [] },
+  {
+    id: 'water',
+    prio: 6,
+    color: [0.184, 0.506, 0.58],
+    natural: ['water', 'bay'],
+    landuse: ['reservoir', 'basin'],
+  },
+  {
+    id: 'beach',
+    prio: 5,
+    color: [0.933, 0.839, 0.647],
+    natural: ['beach', 'sand', 'dune'],
+    landuse: [],
+  },
+  {
+    id: 'cliff',
+    prio: 4,
+    color: [0.706, 0.604, 0.482],
+    natural: ['cliff', 'bare_rock', 'rock', 'scree'],
+    landuse: [],
+  },
   {
     id: 'urban',
     prio: 3,
-    color: [0.788, 0.69, 0.541],
+    color: [0.847, 0.749, 0.549],
     natural: [],
-    landuse: ['residential', 'industrial', 'commercial', 'retail', 'cemetery', 'construction', 'farmyard'],
+    landuse: [
+      'residential',
+      'industrial',
+      'commercial',
+      'retail',
+      'cemetery',
+      'construction',
+      'farmyard',
+    ],
   },
-  { id: 'forest', prio: 2, color: [0.42, 0.478, 0.29], natural: ['wood'], landuse: ['forest'] },
-  { id: 'scrub', prio: 1, color: [0.604, 0.569, 0.376], natural: ['scrub', 'heath', 'grassland', 'shrub'], landuse: [] },
+  { id: 'forest', prio: 2, color: [0.4, 0.451, 0.204], natural: ['wood'], landuse: ['forest'] },
+  {
+    id: 'scrub',
+    prio: 1,
+    color: [0.702, 0.573, 0.314],
+    natural: ['scrub', 'heath', 'grassland', 'shrub'],
+    landuse: [],
+  },
 ];
-const FIELD_COLOR = [0.541, 0.604, 0.357]; // #8A9A5B
+const FIELD_COLOR = [0.561, 0.608, 0.259]; // #8F9B42
 
 /** Carga los polígonos de cobertura y devuelve un colorAt(x, z) → [r,g,b]. */
 export async function loadLandcover(file) {

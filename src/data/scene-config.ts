@@ -7,6 +7,10 @@ export const TOWN = {
   lon: -0.2233,
 } as const;
 
+// Centro del diorama para la distancia de autoapagado del DOF. El origen
+// (0,0,0) está dentro del pueblo y es fácil de visualizar con el gizmo.
+export const DIORAMA_CENTER = [0, 0, 0] as const;
+
 // Encuadre (bbox). Coordenadas exactas derivadas en Fase 2 (OSM + MDT05).
 export const BBOX = {
   southMeters: 600,
@@ -41,13 +45,15 @@ export const PALETTE = {
   background: '#2A2D31',
   wall: '#F2E6D0',
   roof: '#C96F4A',
-  vegetation: '#8A9A5B',
-  dryField: '#D9B36C',
-  ground: '#C9B08A',
+  vegetation: '#8F9B42',
+  dryField: '#B39250',
+  ground: '#D8BF8C',
   street: '#7A7468',
   road: '#5B6066',
-  water: '#3E7C9E',
-  sand: '#E4D3B0',
+  water: '#2F8194',
+  sand: '#EED6A5',
+  forest: '#667334',
+  cliff: '#B49A7B',
   accent: '#E0A23C',
   skyDay: '#A8D4E8',
   sunset: '#E8A87C',
@@ -77,6 +83,7 @@ export const LIGHTING = {
   dof: {
     near: 140,
     far: 330,
+    // Distancia cámara -> DIORAMA_CENTER a partir de la cual se apaga.
     autoDisableDistance: 800,
     maxBokeh: 4,
     nearBlurMultiplier: 5.0,
