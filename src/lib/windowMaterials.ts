@@ -254,6 +254,9 @@ function createWindowMaterial(original: THREE.Material): THREE.MeshStandardMater
 function isWindowGlass(name: string, meshKey: string, force: boolean): boolean {
   const key = normalizeName(name);
   if (key.includes('marco')) return false;
+  // Las puertas acristaladas no son ventanas: no deben recibir el emisivo
+  // nocturno del shader de ventanas.
+  if (key.includes('puerta')) return false;
 
   // Contrato final de Blender: material único `luz`. Como las farolas usan el
   // mismo nombre, solo se acepta aquí si el nodo se llama `ventana...` o si

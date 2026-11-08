@@ -66,6 +66,16 @@ const ROOF_PATTERN = `
       }`;
 
 // Jardín: dos verdes con ruido + flores esporádicas (amarillas y rosas).
+// Enlucido de paredes crema. Se comparte por nombre con las casas y la
+// estación; no hay un patrón específico duplicado para cada GLB.
+const PLASTER_PATTERN = `
+      {
+        vec2 p = vec2(vHouseWorldPos.x + vHouseWorldPos.z, vHouseWorldPos.y);
+        float broad = houseNoise(p * 0.45);
+        float fine = houseNoise(p * 2.4);
+        diffuseColor.rgb *= 0.95 + 0.05 * broad + 0.02 * fine;
+      }`;
+
 const GARDEN_PATTERN = `
       {
         vec2 p = vHouseWorldPos.xz;
@@ -136,7 +146,10 @@ function injectWorldPosition(shader: { vertexShader: string; fragmentShader: str
 function applyPattern(material: THREE.MeshStandardMaterial, pattern: string, key: string) {
   material.onBeforeCompile = (shader) => {
     injectWorldPosition(shader);
-    shader.fragmentShader = shader.fragmentShader.replace('void main() {', `${HELPERS}void main() {`);
+    shader.fragmentShader = shader.fragmentShader.replace(
+      'void main() {',
+      `${HELPERS}void main() {`,
+    );
     shader.fragmentShader = shader.fragmentShader.replace(
       'vec4 diffuseColor = vec4( diffuse, opacity );',
       `vec4 diffuseColor = vec4( diffuse, opacity );${pattern}`,
@@ -153,10 +166,12 @@ export function setupHouseMaterials(scene: THREE.Object3D) {
     const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
     for (const mat of mats) {
       const key = normalizeName(mat.name);
-      // Cualquier tejado (tejado_teja, tejado_teja_oscura, tejaAzul…) comparte
-      // patrón; el color base de cada material se respeta.
-      if (key.startsWith('teja')) {
+      // Cualquier tejado (teja, tejado_teja, tejado_teja_oscura, tejaAzul…)
+      // comparte patrón; el color base de cada material se respeta.
+      if (key.startsWith('teja') || key.startsWith('tejado')) {
         applyPattern(mat as THREE.MeshStandardMaterial, ROOF_PATTERN, 'house-roof');
+      } else if (key === 'paredcrema') {
+        applyPattern(mat as THREE.MeshStandardMaterial, PLASTER_PATTERN, 'house-plaster');
       } else if (key === 'jardin') {
         applyPattern(mat as THREE.MeshStandardMaterial, GARDEN_PATTERN, 'house-garden');
       } else if (key === 'panelsolar') {
