@@ -1,8 +1,10 @@
-import { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useEffect, useRef, useState } from 'react';
+import { useProgress } from '@react-three/drei';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { LIGHTING } from '../data/scene-config';
 import { useTimeOfDay } from '../lighting/useTimeOfDay';
+import { disableShadowMapAutoUpdate, markShadowMapDirty } from '../lib/shadowMap';
 import { directionFromAltAz } from '../lib/timeOfDay';
 import { useStore } from '../store/useStore';
 
@@ -41,13 +43,9 @@ function smoothstep(edge0: number, edge1: number, x: number): number {
 function backgroundForAltitude(altitude: number, out: THREE.Color): THREE.Color {
   if (altitude <= -0.12) return out.copy(C.backgroundNight);
   if (altitude < 0) {
-    return out
-      .copy(C.backgroundNight)
-      .lerp(C.backgroundSunset, smoothstep(-0.12, 0, altitude));
+    return out.copy(C.backgroundNight).lerp(C.backgroundSunset, smoothstep(-0.12, 0, altitude));
   }
-  return out
-    .copy(C.backgroundSunset)
-    .lerp(C.backgroundDay, smoothstep(0, 0.35, altitude));
+  return out.copy(C.backgroundSunset).lerp(C.backgroundDay, smoothstep(0, 0.35, altitude));
 }
 
 // La niebla sigue al cielo, un poco más apagada para leerse sobre él.
@@ -67,6 +65,10 @@ export default function SunMoon() {
   const backgroundRef = useRef<THREE.Color>(null);
   const fogRef = useRef<THREE.FogExp2>(null);
   const firstFrame = useRef(true);
+  const gl = useThree((state) => state.gl);
+  const { loaded, total } = useProgress();
+  const lastShadowAzimuth = useRef<number | null>(null);
+  const shadowWasEnabled = useRef(false);
   const time = useTimeOfDay();
   const fogEnabled = useStore((s) => s.effects.fog);
   const shadowsEnabled = useStore((s) => s.effects.shadows);
@@ -77,6 +79,16 @@ export default function SunMoon() {
   );
   const shadowSize =
     qualityTier === 'low' ? LIGHTING.shadow.mapSizeLow : LIGHTING.shadow.mapSizeHigh;
+
+  // El shadow map direccional no depende de la cámara. Lo congelamos y pedimos
+  // un render nuevo solo al cargar modelos, cambiar el tamaño o girar el sol.
+  useEffect(() => {
+    disableShadowMapAutoUpdate(gl);
+  }, [gl]);
+
+  useEffect(() => {
+    markShadowMapDirty(gl);
+  }, [gl, shadowSize, loaded, total]);
 
   useFrame((_, delta) => {
     const sun = sunRef.current;
@@ -115,6 +127,26 @@ export default function SunMoon() {
     const dirY = Math.max(0.16, dir.y);
     tmpSunPos.set(dir.x, dirY, dir.z).normalize().multiplyScalar(3200);
     sun.position.lerp(tmpSunPos, instant ? 1 : 1 - Math.exp(-delta * 1.8));
+
+    // El mapa de sombras solo se recalcula cuando el sol ha girado lo suficiente.
+    // Se usa la posición real (con damping), no el target: así los cambios
+    // manuales de hora no se quedan con un mapa viejo a medio interpolar.
+    if (!shadowPassEnabled) {
+      shadowWasEnabled.current = false;
+    } else {
+      const actualAzimuth = Math.atan2(sun.position.x, -sun.position.z);
+      const last = lastShadowAzimuth.current;
+      const azimuthDelta =
+        last === null
+          ? Infinity
+          : Math.atan2(Math.sin(actualAzimuth - last), Math.cos(actualAzimuth - last));
+      const threshold = THREE.MathUtils.degToRad(LIGHTING.shadow.updateAngleDeg);
+      if (!shadowWasEnabled.current || Math.abs(azimuthDelta) >= threshold) {
+        markShadowMapDirty(gl);
+        lastShadowAzimuth.current = actualAzimuth;
+        shadowWasEnabled.current = true;
+      }
+    }
 
     // Color e intensidad sí siguen la hora: blanco cálido, naranja al horizonte, luna fría.
     const horizonMix = 1 - smoothstep(0.0, 0.45, altitude);
@@ -180,16 +212,8 @@ export default function SunMoon() {
 
   return (
     <>
-      <color
-        attach="background"
-        ref={backgroundRef}
-        args={[LIGHTING.colors.backgroundNight]}
-      />
-      <fogExp2
-        attach="fog"
-        ref={fogRef}
-        args={[LIGHTING.colors.fogNight, LIGHTING.fogDensity]}
-      />
+      <color attach="background" ref={backgroundRef} args={[LIGHTING.colors.backgroundNight]} />
+      <fogExp2 attach="fog" ref={fogRef} args={[LIGHTING.colors.fogNight, LIGHTING.fogDensity]} />
       <ambientLight
         ref={ambientRef}
         color={LIGHTING.colors.ambientDay}

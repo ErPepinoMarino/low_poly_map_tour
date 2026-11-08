@@ -20,7 +20,9 @@ export default function Windows() {
     scene.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
       if (mesh.isMesh) {
-        mesh.castShadow = true;
+        // Las ventanas van pegadas a la fachada y son emisivas: su sombra no
+        // aporta nada y obliga a renderizar toda la malla en el shadow map.
+        mesh.castShadow = false;
         mesh.receiveShadow = true;
       }
     });

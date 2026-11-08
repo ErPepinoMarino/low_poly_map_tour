@@ -79,14 +79,18 @@ export const LIGHTING = {
     far: 7000,
     bias: -0.0002,
     normalBias: 0.03,
+    // El shadow map solo se regenera cuando el azimut cambia este ángulo.
+    // Con 4096/2048 px equivale aproximadamente a 0,5–1 texel de desplazamiento
+    // en sombras de casas de 10–20 m: el salto es imperceptible.
+    updateAngleDeg: 1,
   },
   dof: {
-    near: 140,
+    near: 80,
     far: 330,
     // Distancia cámara -> DIORAMA_CENTER a partir de la cual se apaga.
-    autoDisableDistance: 800,
-    maxBokeh: 4,
-    nearBlurMultiplier: 5.0,
+    autoDisableDistance: 600,
+    maxBokeh: 7,
+    nearBlurMultiplier: 10.0,
     farBlurMultiplier: 1.7,
     farBlurTransition: 180,
     gizmoSize: 500,

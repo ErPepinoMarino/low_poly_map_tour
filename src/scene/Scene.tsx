@@ -1,4 +1,5 @@
 import Houses from './Houses';
+import NightSky from './NightSky';
 import Pois from './Pois';
 import Streets from './Streets';
 import SunMoon from './SunMoon';
@@ -11,6 +12,7 @@ export default function Scene() {
   return (
     <>
       <SunMoon />
+      <NightSky />
       <Terrain />
       <Streets />
       <Houses />
