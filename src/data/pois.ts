@@ -1,7 +1,5 @@
 import rawPois from './pois.json';
 
-export type PoiKind = 'edificio' | 'lugar';
-
 export interface PoiCamera {
   position: [number, number, number];
   target: [number, number, number];
@@ -14,7 +12,7 @@ export interface PoiDescription {
 
 export interface PoiData {
   id: string;
-  tipo: PoiKind;
+  categoria: PoiDescription;
   name: string;
   nameEn: string;
   lat: number;

@@ -65,10 +65,7 @@
     "prev": "Punto de interés anterior",
     "next": "Punto de interés siguiente",
     "photoAlt": "Foto de {{name}}",
-    "photoPending": "Foto pendiente",
-    "building": "Edificio",
-    "place": "Lugar",
-    "noInfo": "Información pendiente de redactar."
+    "photoPending": "Foto pendiente"
   },
   "error": {
     "title": "Algo ha fallado",

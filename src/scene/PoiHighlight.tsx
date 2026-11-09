@@ -95,6 +95,11 @@ export default function PoiHighlight({ scene }: { scene: THREE.Object3D }) {
   const hoverStartedAt = useRef(0);
   const selectedStartedAt = useRef(0);
   const selectedDuration = useRef(3);
+  const latestFlightDuration = useRef(flightDuration);
+
+  useEffect(() => {
+    latestFlightDuration.current = flightDuration;
+  }, [flightDuration]);
 
   const hoverMaterial = useMemo(() => createHighlightMaterial(), []);
   const selectedMaterial = useMemo(() => createHighlightMaterial(), []);
@@ -134,9 +139,9 @@ export default function PoiHighlight({ scene }: { scene: THREE.Object3D }) {
     root.add(clone);
     root.visible = true;
     selectedStartedAt.current = performance.now();
-    selectedDuration.current = flightDuration;
+    selectedDuration.current = latestFlightDuration.current;
     setHighlightOpacity(selectedMaterial, 0.84);
-  }, [scene, flightPoiId, flightId, flightDuration, selectedMaterial]);
+  }, [scene, flightPoiId, flightId, selectedMaterial]);
 
   useFrame(() => {
     if (hoverRoot.current?.visible) {

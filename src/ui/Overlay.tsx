@@ -254,12 +254,12 @@ function NerdInfoPanel() {
   const showCameraGizmo = useStore((state) => state.showCameraGizmo);
   const setShowCameraGizmo = useStore((state) => state.setShowCameraGizmo);
   const performanceMode = useStore((state) => state.performanceMode);
+  const dofActive = useStore((state) => state.dofActive);
   const dofRequested = effects.dof && !performanceMode;
   const autoDisabled =
     dofRequested &&
     cameraInfo !== null &&
-    cameraInfo.centerDistance > LIGHTING.dof.autoDisableDistance;
-  const dofActive = dofRequested && cameraInfo !== null && !autoDisabled;
+    cameraInfo.centerDistance >= LIGHTING.dof.autoDisableDistance;
   const formatNumber = (value: number) => value.toLocaleString(i18n.language);
 
   return (
@@ -307,7 +307,7 @@ function NerdInfoPanel() {
         <div className="hud-mono">
           {autoDisabled
             ? `${t('hud.dofAutoOff')} · ${t('hud.centerDistance')} ${cameraInfo?.centerDistance.toFixed(0)} m`
-            : dofActive
+            : dofRequested && dofActive
               ? `${t('hud.dofActive')} · ${t('hud.dofBand')} ${dofNear}–${dofFar} m`
               : t('hud.dofOff')}
         </div>

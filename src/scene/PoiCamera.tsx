@@ -1,23 +1,33 @@
 import { useEffect, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
+import {
+  createCameraFlightPlan,
+  getCameraFlightProgress,
+  sampleCameraFlightPosition,
+  sampleCameraFlightQuaternion,
+  type CameraFlightPlan,
+} from '../lib/cameraFlight';
 import { useStore } from '../store/useStore';
 
 interface OrbitControlsLike {
   target: THREE.Vector3;
+  update: () => void;
   addEventListener: (type: string, listener: () => void) => void;
   removeEventListener: (type: string, listener: () => void) => void;
 }
 
 interface FlightStart {
   id: number;
-  position: THREE.Vector3;
-  target: THREE.Vector3;
+  plan: CameraFlightPlan;
   elapsed: number;
+  lookDistance: number;
 }
 
-const targetPosition = new THREE.Vector3();
-const targetLookAt = new THREE.Vector3();
+const flightPosition = new THREE.Vector3();
+const flightQuaternion = new THREE.Quaternion();
+const forward = new THREE.Vector3();
+const lookTarget = new THREE.Vector3();
 
 // Vuelo de cámara cancelable hacia los encuadres de POI. El panel y la cámara
 // son independientes: este componente solo ejecuta la petición del store.
@@ -44,12 +54,26 @@ export default function PoiCamera() {
       panelTimer.current = null;
     }
 
+    const request = useStore.getState().cameraFlightRequest;
+    if (!request || request.id !== requestId) return;
+
+    const plan = createCameraFlightPlan({
+      startPosition: camera.position,
+      startQuaternion: camera.quaternion,
+      endPosition: new THREE.Vector3(...request.position),
+      endTarget: new THREE.Vector3(...request.target),
+      up: camera.up,
+    });
     start.current = {
       id: requestId,
-      position: camera.position.clone(),
-      target: controls.target.clone(),
+      plan,
       elapsed: 0,
+      lookDistance: Math.max(20, camera.position.distanceTo(controls.target)),
     };
+
+    if (Math.abs(plan.duration - request.duration) > 0.001) {
+      useStore.getState().setCameraFlightDuration(requestId, plan.duration);
+    }
   }, [requestId, camera, controls]);
 
   useEffect(
@@ -62,22 +86,31 @@ export default function PoiCamera() {
   useFrame((_, delta) => {
     const active = useStore.getState().cameraFlightRequest;
     const flight = start.current;
-    if (!active || !flight || flight.id !== active.id) return;
+    if (!active || !flight || flight.id !== active.id || !controls) return;
 
     flight.elapsed += delta;
-    const progress = Math.min(1, flight.elapsed / active.duration);
-    const eased = progress * progress * (3 - 2 * progress);
+    const progress = getCameraFlightProgress(flight.elapsed, flight.plan);
 
-    if (!controls) return;
+    sampleCameraFlightPosition(flight.plan, progress, flightPosition);
+    sampleCameraFlightQuaternion(flight.plan, progress, flightQuaternion);
+    camera.position.copy(flightPosition);
+    camera.quaternion.copy(flightQuaternion);
 
-    targetPosition.set(...active.position);
-    targetLookAt.set(...active.target);
-    camera.position.lerpVectors(flight.position, targetPosition, eased);
-    controls.target.lerpVectors(flight.target, targetLookAt, eased);
-    camera.lookAt(controls.target);
+    // Mantener el target de OrbitControls delante de la cámara mientras dura
+    // el vuelo. Así, si el usuario interrumpe con el ratón, la órbita continúa
+    // desde la orientación actual sin un salto de cámara.
+    forward.set(0, 0, -1).applyQuaternion(camera.quaternion);
+    lookTarget.copy(camera.position).addScaledVector(forward, flight.lookDistance);
+    controls.target.copy(lookTarget);
     camera.updateMatrixWorld();
 
-    if (progress < 1) return;
+    if (flight.elapsed < flight.plan.duration) return;
+
+    camera.position.copy(flight.plan.endPosition);
+    camera.quaternion.copy(flight.plan.endQuaternion);
+    controls.target.copy(flight.plan.endTarget);
+    controls.update();
+    camera.updateMatrixWorld();
 
     start.current = null;
     const shouldOpenPanel = active.openPanelOnArrival;

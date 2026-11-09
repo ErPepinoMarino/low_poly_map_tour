@@ -2,6 +2,9 @@ import * as THREE from 'three';
 
 // Materiales procedurales específicos de los POIs. Los nombres vienen de
 // Blender normalizados: muroCastillo -> murocastillo, cespedFubol -> cespedfubol.
+// Los materiales compartidos con casas y calles (jardin, acera, tejados,
+// panelSolar, pared_crema) se configuran antes en setupNamedMaterials; aquí no
+// se vuelven a crear.
 const normalizeName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
 
 const HELPERS = `
@@ -145,13 +148,87 @@ const GLASS_DOOR_PATTERN = `
         diffuseColor.rgb = mix(glass, vec3(0.12, 0.10, 0.08), frame * 0.85);
       }`;
 
-// Reja amarilla: desgaste metálico suave sobre la geometría de barras.
-const YELLOW_METAL_PATTERN = `
+// Rejas metálicas (amarilla o negra): desgaste suave sobre la geometría de barras.
+const METAL_BARS_PATTERN = `
       {
         vec2 uv = poiTriplanar(vPoiWorldPos);
         float wear = poiNoise(uv * 2.0 + vec2(4.2, 7.1));
         float fine = poiNoise(uv * 8.0 + vec2(1.3, 2.7));
         diffuseColor.rgb *= 0.90 + 0.10 * wear + 0.025 * fine;
+      }`;
+
+// Superficies pintadas del polideportivo: pintura deportiva, marcas y desgaste
+// de uso. Un solo patrón para verde, marrón y rojo evita duplicar shaders.
+const PAINTED_SURFACE_PATTERN = `
+      {
+        vec2 uv = poiTriplanar(vPoiWorldPos);
+        float broad = poiNoise(uv * 0.62 + vec2(2.3, 5.1));
+        float fine = poiNoise(uv * 4.2 + vec2(7.7, 1.4));
+        float scuff = smoothstep(0.82, 0.97, poiNoise(uv * 1.7 + vec2(4.4, 9.2)));
+        float detail = 1.0 - smoothstep(0.18, 0.8, max(fwidth(uv.x), fwidth(uv.y)));
+
+        diffuseColor.rgb *= 0.95 + 0.07 * broad;
+        diffuseColor.rgb *= 1.0 + (fine - 0.5) * 0.05 * detail;
+        diffuseColor.rgb *= 1.0 - scuff * 0.04;
+      }`;
+
+// Fachada verde del mercado: chapa pintada con juntas verticales suaves.
+// Las juntas se atenúan con la distancia para no formar moiré.
+const MARKET_WALL_PATTERN = `
+      {
+        vec2 uv = poiWallUV(vPoiWorldPos);
+        float panelWidth = 1.15;
+        float panel = fract(uv.x / panelWidth);
+        float seam = 1.0 - smoothstep(0.018, 0.06, min(panel, 1.0 - panel));
+        seam *= 1.0 - smoothstep(0.22, 0.8, fwidth(uv.x) / panelWidth);
+
+        float broad = poiNoise(uv * 0.55 + vec2(3.2, 6.1));
+        float fine = poiNoise(uv * 3.0 + vec2(1.2, 8.4));
+
+        diffuseColor.rgb *= 0.94 + 0.08 * broad;
+        diffuseColor.rgb *= 1.0 - seam * 0.10;
+        diffuseColor.rgb *= 0.985 + 0.03 * fine;
+      }`;
+
+// Tierra batida: grano fino sobre una base arcillosa, sin líneas de pista.
+const CLAY_PATTERN = `
+      {
+        vec2 uv = poiTriplanar(vPoiWorldPos);
+        float broad = poiNoise(uv * 0.48 + vec2(4.3, 1.8));
+        float grain = poiNoise(uv * 9.0 + vec2(2.1, 6.7));
+        float detail = 1.0 - smoothstep(0.25, 0.9, max(fwidth(uv.x), fwidth(uv.y)));
+
+        diffuseColor.rgb *= 0.90 + 0.12 * broad;
+        diffuseColor.rgb *= 1.0 + (grain - 0.5) * 0.10 * detail;
+      }`;
+
+// Gradas del teatro: peldaños horizontales de hormigón. Las bandas se calculan
+// por altura de mundo, así siguen la pendiente real del graderío.
+const THEATER_STEPS_PATTERN = `
+      {
+        float rowHeight = 0.52;
+        float row = (vPoiWorldPos.y + 0.13) / rowHeight;
+        float f = fract(row);
+        float edge = min(f, 1.0 - f);
+        float seam = 1.0 - smoothstep(0.012, 0.075, edge);
+        float lip = smoothstep(0.0, 0.20, f) * (1.0 - smoothstep(0.80, 1.0, f));
+        float grain = poiNoise(vPoiWorldPos.xz * 2.4 + vec2(vPoiWorldPos.y * 1.6));
+        float detail = 1.0 - smoothstep(0.15, 0.6, fwidth(row));
+
+        vec3 stone = diffuseColor.rgb * (0.86 + 0.13 * lip);
+        stone *= 0.94 + 0.09 * grain;
+        stone = mix(stone, diffuseColor.rgb * 0.58, seam * 0.45);
+        diffuseColor.rgb = mix(diffuseColor.rgb * (0.94 + 0.08 * grain), stone, detail);
+      }`;
+
+// Lámina de agua de la piscina: ondulación suave y estática, sin transparencia.
+const WATER_PATTERN = `
+      {
+        vec2 uv = poiTriplanar(vPoiWorldPos);
+        float wave = sin(uv.x * 1.7 + uv.y * 1.1 + poiNoise(uv * 0.8) * 4.0);
+        float ripple = poiNoise(uv * 3.2 + vec2(wave * 0.5));
+        float light = 0.94 + 0.10 * (0.5 + 0.5 * wave) + 0.04 * ripple;
+        diffuseColor.rgb *= light;
       }`;
 
 // Material de estructura/plataforma que Blender exporta sin asignar.
@@ -359,14 +436,62 @@ export function setupPoiMaterials(scene: THREE.Object3D) {
         std.roughness = 0.28;
         std.metalness = 0.04;
         applyPattern(std, GLASS_DOOR_PATTERN, 'poi-glass-door');
-      } else if (key === 'puertarejaamarilla') {
-        if (material.userData.poiPattern === 'yellow-metal') continue;
-        material.userData.poiPattern = 'yellow-metal';
-        applyPattern(
-          material as THREE.MeshStandardMaterial,
-          YELLOW_METAL_PATTERN,
-          'poi-yellow-metal',
-        );
+      } else if (key === 'puertarejaamarilla' || key === 'puertarejamercado') {
+        if (material.userData.poiPattern === 'metal-bars') continue;
+        material.userData.poiPattern = 'metal-bars';
+        const std = material as THREE.MeshStandardMaterial;
+        if (key === 'puertarejamercado') {
+          // Puerta negra del mercado.
+          std.color.set('#252a2c');
+          std.metalness = 0.45;
+          std.roughness = 0.6;
+        }
+        applyPattern(std, METAL_BARS_PATTERN, 'poi-metal-bars');
+      } else if (key === 'paredmercado') {
+        if (material.userData.poiPattern === 'market-wall') continue;
+        material.userData.poiPattern = 'market-wall';
+        const std = material as THREE.MeshStandardMaterial;
+        // Verde de la fachada del mercado, menos saturado que el color base.
+        std.color.set('#9fbe32');
+        std.roughness = 0.88;
+        applyPattern(std, MARKET_WALL_PATTERN, 'poi-market-wall');
+      } else if (key === 'gradasteatro') {
+        if (material.userData.poiPattern === 'theater-steps') continue;
+        material.userData.poiPattern = 'theater-steps';
+        const std = material as THREE.MeshStandardMaterial;
+        std.color.set('#b7a58a');
+        std.roughness = 0.92;
+        applyPattern(std, THEATER_STEPS_PATTERN, 'poi-theater-steps');
+      } else if (key === 'piscina') {
+        if (material.userData.poiPattern === 'water') continue;
+        material.userData.poiPattern = 'water';
+        const std = material as THREE.MeshStandardMaterial;
+        std.color.set('#2f8fae');
+        std.roughness = 0.22;
+        std.metalness = 0.05;
+        applyPattern(std, WATER_PATTERN, 'poi-water');
+      } else if (key === 'pistatenistierra') {
+        if (material.userData.poiPattern === 'clay') continue;
+        material.userData.poiPattern = 'clay';
+        const std = material as THREE.MeshStandardMaterial;
+        std.color.set('#b65a42');
+        std.roughness = 0.88;
+        applyPattern(std, CLAY_PATTERN, 'poi-clay');
+      } else if (
+        key === 'pinturaverdesuelo' ||
+        key === 'pinturamarron' ||
+        key === 'pinturaroja' ||
+        key === 'pinturarojainstituto'
+      ) {
+        if (material.userData.poiPattern === 'painted-surface') continue;
+        material.userData.poiPattern = 'painted-surface';
+        const std = material as THREE.MeshStandardMaterial;
+        if (key === 'pinturaverdesuelo') std.color.set('#3a8a4b');
+        if (key === 'pinturamarron') std.color.set('#6b4a31');
+        // Pista roja del instituto: terracota desaturada, no rojo de señal.
+        if (key === 'pinturarojainstituto') std.color.set('#b24d3f');
+        std.roughness = key === 'pinturaroja' ? std.roughness : 0.84;
+        applyPattern(std, PAINTED_SURFACE_PATTERN, 'poi-painted-surface');
       } else if (key === 'materialpordefecto') {
         if (material.userData.poiPattern === 'structure') continue;
         material.userData.poiPattern = 'structure';

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 import { setupNamedMaterials } from '../lib/materials';
+import { setupPoiMaterials } from '../lib/poiMaterials';
 
 // Casas del pueblo (exportadas desde Blender con materiales nombrados).
 // Puede reutilizar materiales de streets.glb por nombre (p. ej. "Calle" o "Jardin").
@@ -12,6 +13,9 @@ export default function Houses() {
 
   useEffect(() => {
     setupNamedMaterials(scene);
+    // Las casas comparten algunos materiales con los POIs (Piscina, pintura
+    // roja, verde oscuro). Reutilizamos sus patrones en vez de duplicarlos.
+    setupPoiMaterials(scene);
     scene.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
       if (mesh.isMesh) {

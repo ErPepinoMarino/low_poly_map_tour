@@ -59,6 +59,7 @@ interface AppState {
   effects: Record<EffectId, boolean>;
   dofNear: number;
   dofFar: number;
+  dofActive: boolean;
   showDofGuide: boolean;
   showCameraGizmo: boolean;
   cameraInfo: CameraInfo | null;
@@ -74,6 +75,7 @@ interface AppState {
   openPoiPanel: () => void;
   closePoiPanel: () => void;
   cancelCameraFlight: () => void;
+  setCameraFlightDuration: (id: number, duration: number) => void;
   finishCameraFlight: (id: number) => void;
   closePoi: () => void;
   nextPoi: () => void;
@@ -84,6 +86,7 @@ interface AppState {
   setEffect: (id: EffectId, enabled: boolean) => void;
   setDofNear: (value: number) => void;
   setDofFar: (value: number) => void;
+  setDofActive: (active: boolean) => void;
   setShowDofGuide: (enabled: boolean) => void;
   setShowCameraGizmo: (enabled: boolean) => void;
   setCameraInfo: (info: CameraInfo) => void;
@@ -96,6 +99,8 @@ interface AppState {
   setExtra: (id: string, enabled: boolean) => void;
 }
 
+// Valor inicial del request; PoiCamera lo sustituye por la duración calculada
+// (3–8 s) en cuanto conoce la pose de salida y la ruta.
 const POI_FLIGHT_DURATION = 3;
 const POI_PANEL_OPEN_DELAY = 250;
 
@@ -162,6 +167,7 @@ export const useStore = create<AppState>((set) => ({
   },
   dofNear: LIGHTING.dof.near,
   dofFar: LIGHTING.dof.far,
+  dofActive: false,
   showDofGuide: false,
   showCameraGizmo: false,
   cameraInfo: null,
@@ -194,6 +200,12 @@ export const useStore = create<AppState>((set) => ({
         : null,
     })),
   cancelCameraFlight: () => set({ cameraFlightRequest: null }),
+  setCameraFlightDuration: (id, duration) =>
+    set((s) =>
+      s.cameraFlightRequest?.id === id
+        ? { cameraFlightRequest: { ...s.cameraFlightRequest, duration } }
+        : {},
+    ),
   finishCameraFlight: (id) =>
     set((s) => (s.cameraFlightRequest?.id === id ? { cameraFlightRequest: null } : {})),
   closePoi: () =>
@@ -222,6 +234,7 @@ export const useStore = create<AppState>((set) => ({
   setEffect: (id, enabled) => set((s) => ({ effects: { ...s.effects, [id]: enabled } })),
   setDofNear: (value) => set((s) => ({ dofNear: Math.max(20, Math.min(value, s.dofFar - 10)) })),
   setDofFar: (value) => set((s) => ({ dofFar: Math.max(value, s.dofNear + 10) })),
+  setDofActive: (dofActive) => set({ dofActive }),
   setShowDofGuide: (showDofGuide) => set({ showDofGuide }),
   setShowCameraGizmo: (showCameraGizmo) => set({ showCameraGizmo }),
   setCameraInfo: (cameraInfo) => set({ cameraInfo }),

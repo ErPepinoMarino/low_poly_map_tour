@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import { Bloom, DepthOfField, EffectComposer, SMAA, Vignette } from '@react-three/postprocessing';
@@ -153,30 +153,70 @@ export default function Effects() {
   const near = Math.max(20, dofNear);
   const far = Math.max(near + 10, dofFar);
   const dofRef = useRef<DepthOfFieldEffect>(null);
-  const dofEnabled =
-    effects.dof && !performanceMode && centerDistance <= LIGHTING.dof.autoDisableDistance;
+  const dofBlend = useRef(0);
+  const dofAutoTarget = useRef(0);
+  const dofMountedRef = useRef(false);
+  const [dofMounted, setDofMounted] = useState(false);
 
-  useFrame(() => {
+  useFrame((_, delta) => {
     const dof = dofRef.current;
-    if (!dof) return;
-    patchCameraFocusBand(dof.circleOfConfusionMaterial, near, far);
-    dof.bokehScale = LIGHTING.dof.maxBokeh;
+    const requested = effects.dof && !performanceMode;
+    let target = 0;
+
+    if (requested) {
+      if (centerDistance <= LIGHTING.dof.autoEnableDistance) {
+        target = 1;
+      } else if (centerDistance >= LIGHTING.dof.autoDisableDistance) {
+        target = 0;
+      } else {
+        // Dentro de la banda de histéresis, mantenemos el estado anterior.
+        target = dofAutoTarget.current;
+      }
+    }
+
+    if (target !== dofAutoTarget.current) {
+      dofAutoTarget.current = target;
+      useStore.getState().setDofActive(target === 1);
+    }
+    dofBlend.current = requested
+      ? THREE.MathUtils.damp(dofBlend.current, target, LIGHTING.dof.transitionRate, delta)
+      : 0;
+
+    if (dof) {
+      patchCameraFocusBand(dof.circleOfConfusionMaterial, near, far);
+      dof.bokehScale = LIGHTING.dof.maxBokeh * dofBlend.current;
+    }
+
+    // Montamos al entrar. El autoapagado espera al final del fade; el apagado
+    // manual o por rendimiento desmonta de inmediato para liberar el pase.
+    if (!requested) {
+      if (dofMountedRef.current) {
+        dofMountedRef.current = false;
+        setDofMounted(false);
+      }
+    } else if (target > 0 && !dofMountedRef.current) {
+      dofMountedRef.current = true;
+      setDofMounted(true);
+    } else if (target === 0 && dofBlend.current < 0.005 && dofMountedRef.current) {
+      dofMountedRef.current = false;
+      setDofMounted(false);
+    }
   });
 
   const composerEnabled =
-    !performanceMode && (effects.bloom || effects.vignette || effects.smaa || dofEnabled);
+    !performanceMode && (effects.bloom || effects.vignette || effects.smaa || dofMounted);
 
   return (
     <>
-      {showDofGuide && dofEnabled ? <DofGizmo near={near} far={far} /> : null}
+      {showDofGuide && dofMounted ? <DofGizmo near={near} far={far} /> : null}
       {composerEnabled ? (
         <EffectComposer multisampling={effects.smaa ? 0 : 4} enableNormalPass={false}>
-          {dofEnabled ? (
+          {dofMounted ? (
             <DepthOfField
               ref={dofRef}
               focusDistance={(near + far) / 2}
               focusRange={LIGHTING.dof.farBlurTransition}
-              bokehScale={LIGHTING.dof.maxBokeh}
+              bokehScale={0}
               resolutionScale={LIGHTING.dof.resolutionScale}
             />
           ) : null}

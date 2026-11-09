@@ -47,6 +47,7 @@ export default function PoiPanel() {
   const isEnglish = language === 'en';
   const photoFailed = failedPhotoId === poi?.id;
   const description = poi ? (isEnglish ? poi.description.en : poi.description.es) : '';
+  const category = poi ? (isEnglish ? poi.categoria.en : poi.categoria.es) : '';
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -113,11 +114,13 @@ export default function PoiPanel() {
             </div>
 
             <div className="poi-panel-body">
-              <div className="poi-kind">
-                {t(poi.tipo === 'edificio' ? 'poi.building' : 'poi.place')}
-              </div>
+              {category ? <div className="poi-kind">{category}</div> : null}
               <h2>{isEnglish ? poi.nameEn : poi.name}</h2>
-              {description ? <p>{description}</p> : null}
+              {description ? (
+                <div className="poi-description-scroll">
+                  <p>{description}</p>
+                </div>
+              ) : null}
 
               <button
                 type="button"

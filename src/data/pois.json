@@ -1,7 +1,6 @@
 [
   {
     "id": "torre-oeste",
-    "tipo": "Patrimonio Histórico",
     "name": "Torre oeste del castillo",
     "nameEn": "West tower of the castle",
     "lat": 39.75733,
@@ -16,11 +15,14 @@
       "es": "",
       "en": ""
     },
-    "note": "revisar — Torre de l'Agüelet (OSM), ¿torre oeste o vigía aparte?"
+    "note": "revisar — Torre de l'Agüelet (OSM), ¿torre oeste o vigía aparte?",
+    "categoria": {
+      "es": "Patrimonio Histórico",
+      "en": "Historic Heritage"
+    }
   },
   {
     "id": "castillo",
-    "tipo": "Patrimonio Histórico",
     "name": "Castillo",
     "nameEn": "Castle",
     "lat": 39.75685,
@@ -34,11 +36,14 @@
     "description": {
       "es": "El castillo de Almenara, en la provincia de Castellón es una fortaleza musulmana del siglo X, construida sobre restos romanos. El topónimo de Al-manara, faro o atalaya indica la posible función de este lugar estratégico en la frontera entre los estados taifas de Valencia y Tortosa. Desde el castillo se controlaba el paso de la costa entre Castellón y Valencia así como la ruta interior que comunicaba con Aragón.",
       "en": "Almenara Castle, in the province of Castellón, is a 10th-century Muslim fortress built on Roman remains. The place name Al-manara, meaning lighthouse or watchtower, points to the strategic role of this site on the border between the taifa states of Valencia and Tortosa. From the castle, the coastal route between Castellón and Valencia was controlled, as well as the inland route connecting with Aragon."
+    },
+    "categoria": {
+      "es": "Patrimonio Histórico",
+      "en": "Historic Heritage"
     }
   },
   {
     "id": "torre-este",
-    "tipo": "Patrimonio Histórico",
     "name": "Torre este del castillo",
     "nameEn": "East tower of the castle",
     "lat": 39.75656,
@@ -53,11 +58,14 @@
       "es": "",
       "en": ""
     },
-    "note": "revisar — nido de ametralladoras (OSM), ¿o torre este?"
+    "note": "revisar — nido de ametralladoras (OSM), ¿o torre este?",
+    "categoria": {
+      "es": "Patrimonio Histórico",
+      "en": "Historic Heritage"
+    }
   },
   {
     "id": "paseo-castillo",
-    "tipo": "Lugar de interés",
     "name": "Paseo del castillo",
     "nameEn": "Castle promenade",
     "lat": 39.7562,
@@ -72,11 +80,14 @@
       "es": "",
       "en": ""
     },
-    "note": "revisar — posición estimada (no está en OSM)"
+    "note": "revisar — posición estimada (no está en OSM)",
+    "categoria": {
+      "es": "Lugar de interés",
+      "en": "Place of interest"
+    }
   },
   {
     "id": "ceip-ereta",
-    "tipo": "Colegio público",
     "name": "CEIP l'Ereta",
     "nameEn": "CEIP l'Ereta",
     "lat": 39.75436,
@@ -90,11 +101,14 @@
     "description": {
       "es": "",
       "en": ""
+    },
+    "categoria": {
+      "es": "Colegio público",
+      "en": "Public school"
     }
   },
   {
     "id": "parroquia",
-    "tipo": "Patrimonio Histórico",
     "name": "Parroquia de los Santos Juanes",
     "nameEn": "Parish of Santos Juanes",
     "lat": 39.75339,
@@ -108,11 +122,14 @@
     "description": {
       "es": "La Iglesia de Almenara, dedicada a los Santos Juanes se construyó por Francisco Martí entre 1721 y 1728. La fachada es de piedra labrada, adornada con mármol azul, trabajado con logro. Tiene acceso a su interior por dos puertas, la principal por la calle de la Iglesia y otra lateral por la Plaza de la Iglesia. Dentro del perímetro inicial se encontraba el antiguo templo (1528).",
       "en": "The Church of Almenara, dedicated to Saints John, was built by Francisco Martí between 1721 and 1728. Its façade is made of carved stone, adorned with blue marble worked with skill. It has two entrances: the main one on Calle de la Iglesia and a side one on Plaza de la Iglesia. Within the original perimeter stood the old temple (1528)."
+    },
+    "categoria": {
+      "es": "Patrimonio Histórico",
+      "en": "Historic Heritage"
     }
   },
   {
     "id": "mercado",
-    "tipo": "edificio",
     "name": "Mercado municipal",
     "nameEn": "Municipal market",
     "lat": 39.7528,
@@ -126,11 +143,14 @@
     "description": {
       "es": "",
       "en": ""
+    },
+    "categoria": {
+      "es": "Mercado municipal",
+      "en": "Municipal market"
     }
   },
   {
     "id": "centro-salud",
-    "tipo": "edificio",
     "name": "Centro de Salud",
     "nameEn": "Health center",
     "lat": 39.75101,
@@ -144,11 +164,14 @@
     "description": {
       "es": "",
       "en": ""
+    },
+    "categoria": {
+      "es": "Centro de salud",
+      "en": "Health centre"
     }
   },
   {
     "id": "ayuntamiento",
-    "tipo": "edificio",
     "name": "Ayuntamiento",
     "nameEn": "Town hall",
     "lat": 39.7515,
@@ -162,11 +185,14 @@
     "description": {
       "es": "",
       "en": ""
+    },
+    "categoria": {
+      "es": "Ayuntamiento",
+      "en": "Town hall"
     }
   },
   {
     "id": "polideportivo",
-    "tipo": "edificio",
     "name": "Polideportivo",
     "nameEn": "Sports center",
     "lat": 39.75226,
@@ -174,18 +200,21 @@
     "node": "polideportivo",
     "photo": "pois/polideportivo.jpg",
     "camera": {
-      "position": [-281.1, 110.4, 263.7],
-      "target": [-340.5, 86.8, 204.4]
+      "position": [-293.6, 106.2, 50.5],
+      "target": [-327.2, 92.7, 55.1]
     },
     "description": {
       "es": "",
       "en": ""
     },
-    "note": "revisar — Pabelló Municipal d'Eports (hay 3 zonas deportivas)"
+    "note": "revisar — Pabelló Municipal d'Eports (hay 3 zonas deportivas)",
+    "categoria": {
+      "es": "Instalación deportiva",
+      "en": "Sports facility"
+    }
   },
   {
     "id": "ies-almenara",
-    "tipo": "Instituto público",
     "name": "IES Almenara",
     "nameEn": "IES Almenara",
     "lat": 39.75196,
@@ -199,12 +228,15 @@
     "description": {
       "es": "",
       "en": ""
+    },
+    "categoria": {
+      "es": "Instituto público",
+      "en": "Public secondary school"
     }
   },
   {
     "id": "estacion-tren",
-    "tipo": "edificio",
-    "name": "Estación de tren",
+    "name": "Estación de Almenara",
     "nameEn": "Train station",
     "lat": 39.74876,
     "lon": -0.21843,
@@ -215,8 +247,12 @@
       "target": [896.8, -111.7, 291.3]
     },
     "description": {
-      "es": "",
-      "en": ""
+      "es": "La estación fue inaugurada el 25 de agosto de 1862 con la apertura del tramo Sagunto-Nules de la línea que pretendía unir Valencia con Tarragona. Las obras corrieron a cargo de la Sociedad de los Ferrocarriles de Almansa a Valencia y Tarragona o AVT que previamente y bajo otros nombres había logrado unir Valencia con Almansa. En 1889, la muerte de José Campo Pérez principal impulsor de la compañía abocó la misma a una fusión con Norte. En 1941, tras la nacionalización del ferrocarril en España la estación pasó a ser gestionada por la recién creada RENFE. El 10 de julio de 2001 se puso en funcionamiento la nueva estación de Almenara que se sitúa a apenas 300 metros del antiguo edificio para viajeros. Las nuevas instalaciones cuentan con cinco vías y tres andenes, uno lateral y dos centrales.",
+      "en": "The station opened on 25 August 1862 with the inauguration of the Sagunto–Nules section of the line intended to link Valencia and Tarragona. The works were carried out by the Almansa to Valencia and Tarragona Railway Company (AVT), which had previously, under other names, managed to connect Valencia with Almansa. In 1889, the death of José Campo Pérez, the company's main promoter, led to its merger with Norte. In 1941, after the nationalisation of the railways in Spain, the station came under the management of the newly created RENFE. On 10 July 2001, the new Almenara station entered service, barely 300 metres from the old passenger building. The new facilities have five tracks and three platforms: one side platform and two island platforms."
+    },
+    "categoria": {
+      "es": "Estación de tren",
+      "en": "Train station"
     }
   }
 ]

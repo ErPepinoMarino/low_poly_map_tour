@@ -532,8 +532,9 @@
 
 .poi-photo-frame {
   position: relative;
-  flex: 0 0 220px;
-  height: 220px;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
   min-height: 0;
   overflow: hidden;
   background:
@@ -561,12 +562,38 @@
 .poi-panel-body {
   display: flex;
   min-height: 0;
-  flex: 0 1 auto;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 10px;
-  overflow-y: auto;
+  overflow: hidden;
   padding: 16px;
+}
+
+.poi-description-scroll {
+  min-height: 0;
+  flex: 0 1 auto;
+  overflow-y: auto;
+  padding-right: 3px;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(213, 162, 70, 0.45) transparent;
+}
+
+.poi-description-scroll::-webkit-scrollbar {
+  width: 5px;
+}
+
+.poi-description-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.poi-description-scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(213, 162, 70, 0.38);
+}
+
+.poi-description-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(213, 162, 70, 0.62);
 }
 
 .poi-kind {
@@ -594,6 +621,7 @@
 
 .poi-center {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   align-self: flex-start;
   gap: 7px;
@@ -623,6 +651,7 @@
 
 .poi-nav {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -679,11 +708,6 @@
   .poi-panel {
     max-height: 80vh;
     border-radius: 16px 0 0 16px;
-  }
-
-  .poi-photo-frame {
-    flex-basis: 180px;
-    height: 180px;
   }
 
   .poi-panel-body h2 {
