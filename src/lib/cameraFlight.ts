@@ -15,9 +15,14 @@ export const CAMERA_FLIGHT = {
   arcBowMax: 40,
 } as const;
 
+export type CameraFlightMode = 'static' | 'linear' | 'bezier';
+
 export interface CameraFlightPlan {
   duration: number;
+  mode: CameraFlightMode;
+  instant: boolean;
   curve: THREE.CubicBezierCurve3;
+  startPosition: THREE.Vector3;
   startQuaternion: THREE.Quaternion;
   endQuaternion: THREE.Quaternion;
   endPosition: THREE.Vector3;
@@ -26,6 +31,10 @@ export interface CameraFlightPlan {
   rampIn: number;
   rampOut: number;
 }
+
+const SAME_POSITION_EPSILON = 0.5; // metros
+const SAME_ROTATION_EPSILON = 0.005; // radianes, ~0.29°
+const SIMPLE_FLIGHT_DISTANCE = 50; // metros
 
 const lookMatrix = new THREE.Matrix4();
 
@@ -56,6 +65,20 @@ export function createCameraFlightPlan(input: {
   const horizontal = new THREE.Vector3(delta.x, 0, delta.z);
   const horizontalLength = horizontal.length();
 
+  const endQuaternion = lookQuaternion(end, input.endTarget, up, new THREE.Quaternion());
+  const angle = input.startQuaternion.angleTo(endQuaternion);
+
+  // Evitamos construir un Bézier cuando la cámara apenas se mueve. En el caso
+  // exacto de "centrar" un POI ya centrado una curva degenerada producía NaN
+  // al mapear distancias sobre una longitud de curva prácticamente cero.
+  let mode: CameraFlightMode =
+    distance < SAME_POSITION_EPSILON
+      ? 'static'
+      : distance < SIMPLE_FLIGHT_DISTANCE
+        ? 'linear'
+        : 'bezier';
+  const instant = mode === 'static' && angle < SAME_ROTATION_EPSILON;
+
   // Un pequeño arco lateral evita que el vuelo sea una línea recta y ayuda
   // cuando el destino está al otro lado del pueblo.
   const side =
@@ -80,27 +103,41 @@ export function createCameraFlightPlan(input: {
     .addScaledVector(side, bow * 0.7);
 
   const curve = new THREE.CubicBezierCurve3(start, c1, c2, end);
-  curve.arcLengthDivisions = 48;
-  const lengths = curve.getLengths(48);
-  const totalLength = Math.max(lengths[lengths.length - 1] ?? 0, 0.001);
+  let totalLength = distance;
+  if (mode === 'bezier') {
+    curve.arcLengthDivisions = 48;
+    const lengths = curve.getLengths(48);
+    const pathLength = lengths[lengths.length - 1] ?? 0;
+    if (pathLength > 1e-5) {
+      totalLength = pathLength;
+    } else {
+      mode = 'linear';
+      totalLength = distance;
+    }
+  } else if (mode === 'static') {
+    totalLength = 0;
+  }
 
-  const endQuaternion = lookQuaternion(end, input.endTarget, up, new THREE.Quaternion());
-  const angle = input.startQuaternion.angleTo(endQuaternion);
   const cruiseSeconds = Math.max(
     totalLength / CAMERA_FLIGHT.maxLinearSpeed,
     angle / CAMERA_FLIGHT.maxAngularSpeed,
   );
   const rampIn = CAMERA_FLIGHT.rampInSeconds;
   const rampOut = CAMERA_FLIGHT.rampOutSeconds;
-  const duration = THREE.MathUtils.clamp(
-    cruiseSeconds + 0.5 * (rampIn + rampOut),
-    CAMERA_FLIGHT.minDurationSeconds,
-    CAMERA_FLIGHT.maxDurationSeconds,
-  );
+  const duration = instant
+    ? 0
+    : THREE.MathUtils.clamp(
+        cruiseSeconds + 0.5 * (rampIn + rampOut),
+        CAMERA_FLIGHT.minDurationSeconds,
+        CAMERA_FLIGHT.maxDurationSeconds,
+      );
 
   return {
     duration,
+    mode,
+    instant,
     curve,
+    startPosition: start,
     startQuaternion: input.startQuaternion.clone(),
     endQuaternion,
     endPosition: end,
@@ -115,6 +152,7 @@ export function createCameraFlightPlan(input: {
 // La velocidad empieza y termina en cero, pero no se queda "parada" durante
 // una fracción grande del vuelo como ocurría con smoothstep en vuelos largos.
 export function getCameraFlightProgress(elapsed: number, plan: CameraFlightPlan) {
+  if (plan.instant || plan.duration <= 0) return 1;
   if (elapsed <= 0) return 0;
   if (elapsed >= plan.duration) return 1;
 
@@ -143,7 +181,16 @@ export function sampleCameraFlightPosition(
   out: THREE.Vector3,
 ) {
   const u = THREE.MathUtils.clamp(progress, 0, 1);
-  return plan.curve.getPoint(plan.curve.getUtoTmapping(u, u * plan.totalLength), out);
+  if (plan.mode === 'static') return out.copy(plan.startPosition);
+  if (plan.mode === 'linear') return out.lerpVectors(plan.startPosition, plan.endPosition, u);
+
+  plan.curve.getPoint(plan.curve.getUtoTmapping(u, u * plan.totalLength), out);
+  // Guarda defensiva: una curva degenerada nunca debe llegar a la cámara como
+  // NaN. Si ocurre, caemos a una interpolación lineal segura.
+  if (!Number.isFinite(out.x) || !Number.isFinite(out.y) || !Number.isFinite(out.z)) {
+    out.lerpVectors(plan.startPosition, plan.endPosition, u);
+  }
+  return out;
 }
 
 export function sampleCameraFlightQuaternion(
