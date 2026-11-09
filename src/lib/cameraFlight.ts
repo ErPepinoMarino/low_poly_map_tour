@@ -3,8 +3,8 @@ import * as THREE from 'three';
 // Parámetros del vuelo de cámara. La duración no es fija: se calcula con la
 // longitud real del arco y el ángulo de giro, y se limita a este rango.
 export const CAMERA_FLIGHT = {
-  minDurationSeconds: 3,
-  maxDurationSeconds: 8,
+  minDurationSeconds: 2,
+  maxDurationSeconds: 6,
   maxLinearSpeed: 180, // m/s en el tramo de crucero
   maxAngularSpeed: 0.45, // rad/s en el tramo de crucero
   rampInSeconds: 0.35,

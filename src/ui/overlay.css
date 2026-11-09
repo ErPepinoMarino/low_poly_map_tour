@@ -779,17 +779,17 @@
 
 @media (max-width: 600px) {
   :root {
-    --poi-panel-width: min(94vw, 420px);
+    --poi-panel-width: min(calc(50vw - 10px), 320px);
   }
 
   .poi-panel {
-    max-height: 55vh;
-    max-height: 55dvh;
+    max-height: 82vh;
+    max-height: 82dvh;
     border-radius: 16px 0 0 16px;
   }
 
   .poi-photo-frame {
-    aspect-ratio: 18 / 9;
+    aspect-ratio: 4 / 3;
   }
 
   .poi-close {
@@ -810,24 +810,30 @@
   }
 }
 
+@media (max-width: 420px) and (orientation: portrait) {
+  .poi-photo-frame {
+    aspect-ratio: 5 / 3;
+  }
+}
+
 @media (orientation: landscape) and (max-height: 600px) {
   :root {
-    --poi-panel-width: min(38vw, 420px);
+    --poi-panel-width: min(34vw, 360px);
   }
 
   .poi-panel {
-    max-height: calc(100vh - 16px);
-    max-height: calc(100dvh - 16px);
+    max-height: calc(100vh - 8px);
+    max-height: calc(100dvh - 8px);
     border-radius: 16px 0 0 16px;
   }
 
   .poi-photo-frame {
-    aspect-ratio: 21 / 9;
+    aspect-ratio: 239 / 100;
   }
 
   .poi-panel-body {
-    gap: 8px;
-    padding: 12px;
+    gap: 6px;
+    padding: 8px;
   }
 
   .poi-close {
@@ -845,6 +851,31 @@
   .hud.has-small-hint .hud-clock-corner,
   .hud.has-small-hint .hud-options {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 380px) {
+  .poi-panel-body {
+    gap: 4px;
+    padding: 6px;
+  }
+
+  .poi-kind {
+    display: none;
+  }
+
+  .poi-center {
+    padding: 6px 10px;
+  }
+
+  .poi-nav {
+    margin-top: 4px;
+    padding-top: 8px;
+  }
+
+  .poi-nav button {
+    width: 34px;
+    height: 34px;
   }
 }
 

@@ -145,8 +145,8 @@ function navigationState(
   };
 }
 
-// Fase 6: estado del look final. Los efectos caros (DOF) nacen apagados en móvil;
-// el resto se puede desactivar desde el HUD.
+// Fase 6: estado del look final. DOF y sombras se mantienen activos por defecto
+// también en móvil; se pueden desactivar desde el HUD o con modo rendimiento.
 export const useStore = create<AppState>((set) => ({
   uiState: 'free',
   selectedPoiId: null,
@@ -159,12 +159,12 @@ export const useStore = create<AppState>((set) => ({
   lightMode: 'real',
   manualHour: 22.5,
   effects: {
-    dof: !isMobile,
+    dof: true,
     bloom: true,
     vignette: true,
     fog: true,
     smaa: true,
-    shadows: !isMobile,
+    shadows: true,
   },
   dofNear: LIGHTING.dof.near,
   dofFar: LIGHTING.dof.far,
