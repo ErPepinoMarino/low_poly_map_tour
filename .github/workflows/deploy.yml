@@ -1,8 +1,10 @@
 name: Deploy to GitHub Pages
 
-# Despliegue manual: se ejecuta desde la pestaña "Actions" → "Run workflow".
+# Despliegue automático en cada push a main y manual desde Actions.
 # Requiere que el repo sea público y que Pages use la fuente "GitHub Actions".
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
