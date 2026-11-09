@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { getPoi, POIS } from '../data/pois';
 import { LIGHTING } from '../data/scene-config';
+import { detectAppLanguage } from '../lib/appLanguage';
 
 export type UiState = 'free' | 'selected';
 export type LightMode = 'real' | 'day' | 'night' | 'manual';
@@ -154,7 +155,7 @@ export const useStore = create<AppState>((set) => ({
   poiPanelOpen: false,
   cameraFlightRequest: null,
   cameraFlightSerial: 0,
-  language: 'es',
+  language: detectAppLanguage(),
   lightMode: 'real',
   manualHour: 22.5,
   effects: {

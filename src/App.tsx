@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -18,7 +19,12 @@ import { useStore } from './store/useStore';
 export default function App() {
   const performanceMode = useStore((s) => s.performanceMode);
   const qualityTier = useStore((s) => s.qualityTier);
+  const language = useStore((s) => s.language);
   usePoiDeepLink();
+
+  useEffect(() => {
+    document.documentElement.lang = language;
+  }, [language]);
   const dpr: [number, number] = performanceMode
     ? [1, 1]
     : qualityTier === 'low'

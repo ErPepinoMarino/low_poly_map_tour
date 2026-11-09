@@ -30,6 +30,14 @@ function TargetIcon() {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="poi-close-icon">
+      <path d="m6 6 12 12M18 6 6 18" />
+    </svg>
+  );
+}
+
 export default function PoiPanel() {
   const { t } = useTranslation();
   const language = useStore((state) => state.language);
@@ -112,6 +120,16 @@ export default function PoiPanel() {
                 />
               )}
             </div>
+
+            <button
+              type="button"
+              className="poi-close"
+              aria-label={t('poi.hidePanel')}
+              title={t('poi.hidePanel')}
+              onClick={closePoiPanel}
+            >
+              <CloseIcon />
+            </button>
 
             <div className="poi-panel-body">
               {category ? <div className="poi-kind">{category}</div> : null}

@@ -6,6 +6,8 @@
   },
   "hud": {
     "language": "Idioma",
+    "smallScreenHint": "La experiencia es mucho mejor en una pantalla más grande.",
+    "dismissHint": "Cerrar aviso",
     "nerdInfo": "Info técnica",
     "options": "Opciones",
     "timePanel": "Hora y ciclo día/noche",

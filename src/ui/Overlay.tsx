@@ -14,6 +14,71 @@ const OPTIONS: Array<{ id: EffectId; label: string }> = [
   { id: 'smaa', label: 'hud.smaa' },
 ];
 
+const SMALL_SCREEN_QUERY = '(max-width: 600px), (orientation: landscape) and (max-height: 600px)';
+const HINT_STORAGE_KEY = 'almenara.smallScreenHintDismissed';
+
+function readHintDismissed() {
+  try {
+    return window.localStorage.getItem(HINT_STORAGE_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
+function useSmallScreen() {
+  const [small, setSmall] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(SMALL_SCREEN_QUERY).matches,
+  );
+
+  useEffect(() => {
+    const media = window.matchMedia(SMALL_SCREEN_QUERY);
+    const update = () => setSmall(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+
+  return small;
+}
+
+function useSmallScreenHint() {
+  const panelOpen = useStore((state) => state.poiPanelOpen);
+  const small = useSmallScreen();
+  const [dismissed, setDismissed] = useState(readHintDismissed);
+
+  const visible = small && !dismissed && !panelOpen;
+  const dismiss = () => {
+    setDismissed(true);
+    try {
+      window.localStorage.setItem(HINT_STORAGE_KEY, '1');
+    } catch {
+      // El aviso se oculta igualmente durante esta sesión.
+    }
+  };
+
+  return { visible, dismiss };
+}
+
+function SmallScreenHint({ visible, onDismiss }: { visible: boolean; onDismiss: () => void }) {
+  const { t } = useTranslation();
+  if (!visible) return null;
+
+  return (
+    <aside className="small-screen-hint" role="status">
+      <span>{t('hud.smallScreenHint')}</span>
+      <button
+        type="button"
+        className="small-screen-hint-close"
+        aria-label={t('hud.dismissHint')}
+        title={t('hud.dismissHint')}
+        onClick={onDismiss}
+      >
+        ×
+      </button>
+    </aside>
+  );
+}
+
 function formatClock(hour: number, language: string): string {
   const totalMinutes = Math.round(hour * 60) % (24 * 60);
   const hour24 = Math.floor(totalMinutes / 60);
@@ -155,6 +220,7 @@ export default function Overlay() {
   const setPerformanceMode = useStore((state) => state.setPerformanceMode);
   const [infoOpen, setInfoOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const smallScreenHint = useSmallScreenHint();
 
   // Los menús solo se cierran con su interruptor o con Escape. No se cierran
   // al orbitar/panear ni al hacer clic fuera: así se puede leer la telemetría
@@ -171,7 +237,7 @@ export default function Overlay() {
   }, []);
 
   return (
-    <div className="hud">
+    <div className={`hud${smallScreenHint.visible ? ' has-small-hint' : ''}`}>
       <div className="hud-clock-corner">
         <TimePanel />
       </div>
@@ -238,6 +304,8 @@ export default function Overlay() {
           </span>
         </button>
       </div>
+
+      <SmallScreenHint visible={smallScreenHint.visible} onDismiss={smallScreenHint.dismiss} />
     </div>
   );
 }
