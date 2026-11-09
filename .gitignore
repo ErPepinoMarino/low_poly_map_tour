@@ -24,6 +24,9 @@ Thumbs.db
 # Documento de planificación (privado — no publicar)
 Plan.md
 
+# Instrucciones locales del agente (no publicar)
+agents.md
+
 # Datos crudos (regenerables con scripts/fetch_dem.mjs) — solo el directorio raíz
 /data/
 
