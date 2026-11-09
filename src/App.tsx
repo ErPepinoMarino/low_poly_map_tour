@@ -4,17 +4,21 @@ import * as THREE from 'three';
 import { CAMERA_LIMITS, DEFAULT_VIEW, LIGHTING } from './data/scene-config';
 import CameraGizmo from './scene/CameraGizmo';
 import CameraTelemetry from './scene/CameraTelemetry';
+import PoiCamera from './scene/PoiCamera';
 import CameraSafetyBounds from './scene/CameraSafetyBounds';
 import CameraReset from './scene/CameraReset';
 import Effects from './scene/Effects';
 import SceneStats from './scene/SceneStats';
 import Scene from './scene/Scene';
 import Overlay from './ui/Overlay';
+import PoiPanel from './ui/PoiPanel';
+import { usePoiDeepLink } from './router/usePoiDeepLink';
 import { useStore } from './store/useStore';
 
 export default function App() {
   const performanceMode = useStore((s) => s.performanceMode);
   const qualityTier = useStore((s) => s.qualityTier);
+  usePoiDeepLink();
   const dpr: [number, number] = performanceMode
     ? [1, 1]
     : qualityTier === 'low'
@@ -44,12 +48,14 @@ export default function App() {
           maxPolarAngle={CAMERA_LIMITS.maxPolarAngle}
         />
         <CameraReset />
+        <PoiCamera />
         <CameraSafetyBounds />
         <CameraTelemetry />
         <CameraGizmo />
         <SceneStats />
       </Canvas>
       <Overlay />
+      <PoiPanel />
     </>
   );
 }

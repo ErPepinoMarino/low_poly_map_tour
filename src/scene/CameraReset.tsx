@@ -22,12 +22,13 @@ interface ResetTween {
 
 const DEFAULT_POSITION = new THREE.Vector3(...DEFAULT_VIEW.position);
 const DEFAULT_TARGET = new THREE.Vector3(...DEFAULT_VIEW.target);
-const RESET_DURATION_SECONDS = 3.2;
+const RESET_DURATION_SECONDS = 3;
 
 export default function CameraReset() {
   const camera = useThree((state) => state.camera);
   const controls = useThree((state) => state.controls) as unknown as OrbitControlsLike | null;
   const request = useStore((state) => state.cameraResetRequest);
+  const flightRequest = useStore((state) => state.cameraFlightRequest);
   const cameraRef = useRef(camera);
   const controlsRef = useRef(controls);
   const previousRequest = useRef(request);
@@ -42,6 +43,17 @@ export default function CameraReset() {
     const activeCamera = cameraRef.current;
     const activeControls = controlsRef.current;
     if (!activeControls) return;
+
+    // Un vuelo de POI tiene prioridad: cancela el tween de reset si estaba activo.
+    if (flightRequest) {
+      const current = tween.current;
+      if (current) {
+        activeControls.enabled = current.restoreEnabled;
+        activeControls.enableDamping = current.restoreDamping;
+        tween.current = null;
+      }
+      return;
+    }
 
     if (request !== previousRequest.current) {
       previousRequest.current = request;

@@ -57,6 +57,19 @@
     "textures": "Texturas",
     "measuring": "Midiendo escena…"
   },
+  "poi": {
+    "panel": "Puntos de interés",
+    "showPanel": "Abrir panel de puntos de interés",
+    "hidePanel": "Cerrar panel de puntos de interés",
+    "center": "Centrar en el mapa",
+    "prev": "Punto de interés anterior",
+    "next": "Punto de interés siguiente",
+    "photoAlt": "Foto de {{name}}",
+    "photoPending": "Foto pendiente",
+    "building": "Edificio",
+    "place": "Lugar",
+    "noInfo": "Información pendiente de redactar."
+  },
   "error": {
     "title": "Algo ha fallado",
     "body": "La escena no ha podido cargarse. Abre la consola del navegador (F12) para ver el detalle.",

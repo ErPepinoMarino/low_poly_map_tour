@@ -1,10 +1,22 @@
 import { create } from 'zustand';
+import { getPoi, POIS } from '../data/pois';
 import { LIGHTING } from '../data/scene-config';
 
 export type UiState = 'free' | 'selected';
 export type LightMode = 'real' | 'day' | 'night' | 'manual';
 export type QualityTier = 'low' | 'high';
 export type EffectId = 'dof' | 'bloom' | 'vignette' | 'fog' | 'smaa' | 'shadows';
+export type PoiNavigationSource = 'map' | 'panel' | 'next' | 'prev' | 'deep';
+
+export interface CameraFlightRequest {
+  id: number;
+  poiId: string;
+  position: [number, number, number];
+  target: [number, number, number];
+  duration: number;
+  pauseMs: number;
+  openPanelOnArrival: boolean;
+}
 
 export interface CameraInfo {
   position: [number, number, number];
@@ -36,7 +48,11 @@ const isMobile =
 interface AppState {
   uiState: UiState;
   selectedPoiId: string | null;
+  hoveredPoiId: string | null;
   routeIndex: number;
+  poiPanelOpen: boolean;
+  cameraFlightRequest: CameraFlightRequest | null;
+  cameraFlightSerial: number;
   language: string;
   lightMode: LightMode;
   manualHour: number;
@@ -53,6 +69,12 @@ interface AppState {
   openSignId: string | null;
   extras: Record<string, boolean>;
   selectPoi: (id: string) => void;
+  setHoveredPoiId: (id: string | null) => void;
+  navigateToPoi: (id: string, source?: PoiNavigationSource) => void;
+  openPoiPanel: () => void;
+  closePoiPanel: () => void;
+  cancelCameraFlight: () => void;
+  finishCameraFlight: (id: number) => void;
   closePoi: () => void;
   nextPoi: () => void;
   prevPoi: () => void;
@@ -74,12 +96,59 @@ interface AppState {
   setExtra: (id: string, enabled: boolean) => void;
 }
 
+const POI_FLIGHT_DURATION = 3;
+const POI_PANEL_OPEN_DELAY = 250;
+
+function routeIndexFor(id: string): number {
+  const index = POIS.findIndex((poi) => poi.id === id);
+  return index >= 0 ? index : 0;
+}
+
+function navigationState(
+  state: AppState,
+  id: string,
+  source: PoiNavigationSource,
+): Partial<AppState> {
+  const poi = getPoi(id);
+  if (!poi) return {};
+
+  const fromMap = source === 'map' || source === 'deep';
+  const panelOpen = fromMap ? (source === 'deep' ? false : state.poiPanelOpen) : true;
+  const hasCamera = Boolean(poi.camera);
+  const serial = state.cameraFlightSerial + 1;
+  const openPanelOnArrival = fromMap && !panelOpen;
+
+  return {
+    selectedPoiId: id,
+    routeIndex: routeIndexFor(id),
+    uiState: 'selected',
+    poiPanelOpen: hasCamera ? panelOpen : true,
+    cameraFlightSerial: serial,
+    cameraFlightRequest:
+      hasCamera && poi.camera
+        ? {
+            id: serial,
+            poiId: id,
+            position: poi.camera.position,
+            target: poi.camera.target,
+            duration: POI_FLIGHT_DURATION,
+            pauseMs: POI_PANEL_OPEN_DELAY,
+            openPanelOnArrival,
+          }
+        : null,
+  };
+}
+
 // Fase 6: estado del look final. Los efectos caros (DOF) nacen apagados en móvil;
 // el resto se puede desactivar desde el HUD.
 export const useStore = create<AppState>((set) => ({
   uiState: 'free',
   selectedPoiId: null,
+  hoveredPoiId: null,
   routeIndex: 0,
+  poiPanelOpen: false,
+  cameraFlightRequest: null,
+  cameraFlightSerial: 0,
   language: 'es',
   lightMode: 'real',
   manualHour: 22.5,
@@ -102,10 +171,51 @@ export const useStore = create<AppState>((set) => ({
   qualityTier: isMobile ? 'low' : 'high',
   openSignId: null,
   extras: {},
-  selectPoi: (id) => set({ selectedPoiId: id, uiState: 'selected' }),
-  closePoi: () => set({ selectedPoiId: null, uiState: 'free' }),
-  nextPoi: () => set((s) => ({ routeIndex: s.routeIndex + 1 })),
-  prevPoi: () => set((s) => ({ routeIndex: s.routeIndex - 1 })),
+  selectPoi: (id) => set((s) => navigationState(s, id, 'deep')),
+  setHoveredPoiId: (hoveredPoiId) => set({ hoveredPoiId }),
+  navigateToPoi: (id, source = 'panel') => set((s) => navigationState(s, id, source)),
+  openPoiPanel: () =>
+    set((s) => {
+      const id = s.selectedPoiId ?? POIS[0]?.id;
+      if (!id) return { poiPanelOpen: true };
+      return {
+        poiPanelOpen: true,
+        selectedPoiId: id,
+        routeIndex: routeIndexFor(id),
+        uiState: 'selected',
+      };
+    }),
+  closePoiPanel: () =>
+    set((s) => ({
+      poiPanelOpen: false,
+      uiState: 'free',
+      cameraFlightRequest: s.cameraFlightRequest
+        ? { ...s.cameraFlightRequest, openPanelOnArrival: false }
+        : null,
+    })),
+  cancelCameraFlight: () => set({ cameraFlightRequest: null }),
+  finishCameraFlight: (id) =>
+    set((s) => (s.cameraFlightRequest?.id === id ? { cameraFlightRequest: null } : {})),
+  closePoi: () =>
+    set({
+      selectedPoiId: null,
+      routeIndex: 0,
+      poiPanelOpen: false,
+      uiState: 'free',
+      cameraFlightRequest: null,
+    }),
+  nextPoi: () =>
+    set((s) => {
+      const index = s.selectedPoiId ? routeIndexFor(s.selectedPoiId) : -1;
+      const target = POIS[(index + 1 + POIS.length) % POIS.length];
+      return target ? navigationState(s, target.id, 'next') : {};
+    }),
+  prevPoi: () =>
+    set((s) => {
+      const index = s.selectedPoiId ? routeIndexFor(s.selectedPoiId) : 0;
+      const target = POIS[(index - 1 + POIS.length) % POIS.length];
+      return target ? navigationState(s, target.id, 'prev') : {};
+    }),
   setLanguage: (language) => set({ language }),
   setLightMode: (lightMode) => set({ lightMode }),
   setManualHour: (manualHour) => set({ manualHour, lightMode: 'manual' }),
@@ -120,6 +230,10 @@ export const useStore = create<AppState>((set) => ({
   setQualityTier: (qualityTier) => set({ qualityTier }),
   openSign: (id) => set({ openSignId: id }),
   closeSign: () => set({ openSignId: null }),
-  resetCamera: () => set((state) => ({ cameraResetRequest: state.cameraResetRequest + 1 })),
+  resetCamera: () =>
+    set((state) => ({
+      cameraResetRequest: state.cameraResetRequest + 1,
+      cameraFlightRequest: null,
+    })),
   setExtra: (id, enabled) => set((s) => ({ extras: { ...s.extras, [id]: enabled } })),
 }));

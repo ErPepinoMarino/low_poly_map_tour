@@ -57,6 +57,19 @@
     "textures": "Textures",
     "measuring": "Measuring scene…"
   },
+  "poi": {
+    "panel": "Points of interest",
+    "showPanel": "Open points of interest panel",
+    "hidePanel": "Close points of interest panel",
+    "center": "Center on map",
+    "prev": "Previous point of interest",
+    "next": "Next point of interest",
+    "photoAlt": "Photo of {{name}}",
+    "photoPending": "Photo pending",
+    "building": "Building",
+    "place": "Place",
+    "noInfo": "Information pending."
+  },
   "error": {
     "title": "Something went wrong",
     "body": "The scene could not load. Open the browser console (F12) for details.",

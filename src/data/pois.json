@@ -1,72 +1,222 @@
 [
   {
     "id": "torre-oeste",
+    "tipo": "Patrimonio Histórico",
     "name": "Torre oeste del castillo",
     "nameEn": "West tower of the castle",
     "lat": 39.75733,
     "lon": -0.22299,
+    "node": "torre-oeste",
+    "photo": "pois/torre-oeste.jpg",
+    "camera": {
+      "position": [6, 236.3, -517.7],
+      "target": [83.6, -33.5, -74.5]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    },
     "note": "revisar — Torre de l'Agüelet (OSM), ¿torre oeste o vigía aparte?"
   },
-  { "id": "castillo", "name": "Castillo", "nameEn": "Castle", "lat": 39.75685, "lon": -0.2203 },
+  {
+    "id": "castillo",
+    "tipo": "Patrimonio Histórico",
+    "name": "Castillo",
+    "nameEn": "Castle",
+    "lat": 39.75685,
+    "lon": -0.2203,
+    "node": "castillo",
+    "photo": "pois/castillo.jpg",
+    "camera": {
+      "position": [340.5, 319.8, -465.1],
+      "target": [126.3, 61.4, -96.7]
+    },
+    "description": {
+      "es": "El castillo de Almenara, en la provincia de Castellón es una fortaleza musulmana del siglo X, construida sobre restos romanos. El topónimo de Al-manara, faro o atalaya indica la posible función de este lugar estratégico en la frontera entre los estados taifas de Valencia y Tortosa. Desde el castillo se controlaba el paso de la costa entre Castellón y Valencia así como la ruta interior que comunicaba con Aragón.",
+      "en": "Almenara Castle, in the province of Castellón, is a 10th-century Muslim fortress built on Roman remains. The place name Al-manara, meaning lighthouse or watchtower, points to the strategic role of this site on the border between the taifa states of Valencia and Tortosa. From the castle, the coastal route between Castellón and Valencia was controlled, as well as the inland route connecting with Aragon."
+    }
+  },
   {
     "id": "torre-este",
+    "tipo": "Patrimonio Histórico",
     "name": "Torre este del castillo",
     "nameEn": "East tower of the castle",
     "lat": 39.75656,
     "lon": -0.21974,
+    "node": "torre-este",
+    "photo": "pois/torre-este.jpg",
+    "camera": {
+      "position": [413, 242.1, -440.6],
+      "target": [486.2, 20.3, -56.2]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    },
     "note": "revisar — nido de ametralladoras (OSM), ¿o torre este?"
   },
   {
     "id": "paseo-castillo",
+    "tipo": "Lugar de interés",
     "name": "Paseo del castillo",
     "nameEn": "Castle promenade",
     "lat": 39.7562,
     "lon": -0.2208,
+    "node": "paseo-castillo",
+    "photo": "pois/paseo-castillo.jpg",
+    "camera": {
+      "position": [-262.5, 169.7, -273],
+      "target": [67.7, 67, -394.2]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    },
     "note": "revisar — posición estimada (no está en OSM)"
   },
-  { "id": "ceip-ereta", "name": "CEIP l'Ereta", "nameEn": "CEIP l'Ereta", "lat": 39.75436, "lon": -0.22204 },
+  {
+    "id": "ceip-ereta",
+    "tipo": "Colegio público",
+    "name": "CEIP l'Ereta",
+    "nameEn": "CEIP l'Ereta",
+    "lat": 39.75436,
+    "lon": -0.22204,
+    "node": "ceip-ereta",
+    "photo": "pois/ceip-ereta.jpg",
+    "camera": {
+      "position": [-59.8, 143.1, -35.6],
+      "target": [182.5, -6.6, -124.5]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    }
+  },
   {
     "id": "parroquia",
+    "tipo": "Patrimonio Histórico",
     "name": "Parroquia de los Santos Juanes",
     "nameEn": "Parish of Santos Juanes",
     "lat": 39.75339,
-    "lon": -0.2251
+    "lon": -0.2251,
+    "node": "parroquia",
+    "photo": "pois/parroquia.jpg",
+    "camera": {
+      "position": [-234.8, 58.9, 58.4],
+      "target": [145.1, 42, -181.8]
+    },
+    "description": {
+      "es": "La Iglesia de Almenara, dedicada a los Santos Juanes se construyó por Francisco Martí entre 1721 y 1728. La fachada es de piedra labrada, adornada con mármol azul, trabajado con logro. Tiene acceso a su interior por dos puertas, la principal por la calle de la Iglesia y otra lateral por la Plaza de la Iglesia. Dentro del perímetro inicial se encontraba el antiguo templo (1528).",
+      "en": "The Church of Almenara, dedicated to Saints John, was built by Francisco Martí between 1721 and 1728. Its façade is made of carved stone, adorned with blue marble worked with skill. It has two entrances: the main one on Calle de la Iglesia and a side one on Plaza de la Iglesia. Within the original perimeter stood the old temple (1528)."
+    }
   },
   {
     "id": "mercado",
+    "tipo": "edificio",
     "name": "Mercado municipal",
     "nameEn": "Municipal market",
     "lat": 39.7528,
-    "lon": -0.22691
+    "lon": -0.22691,
+    "node": "mercado",
+    "photo": "pois/mercado.jpg",
+    "camera": {
+      "position": [-392.9, 82.1, -6.1],
+      "target": [-49.2, -158.4, 309]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    }
   },
   {
     "id": "centro-salud",
+    "tipo": "edificio",
     "name": "Centro de Salud",
     "nameEn": "Health center",
     "lat": 39.75101,
-    "lon": -0.22572
+    "lon": -0.22572,
+    "node": "centro-salud",
+    "photo": "pois/centro-salud.jpg",
+    "camera": {
+      "position": [-269.7, 49.4, 346.1],
+      "target": [-22.2, 9.4, 130.6]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    }
   },
   {
     "id": "ayuntamiento",
+    "tipo": "edificio",
     "name": "Ayuntamiento",
     "nameEn": "Town hall",
     "lat": 39.7515,
-    "lon": -0.22328
+    "lon": -0.22328,
+    "node": "ayuntamiento",
+    "photo": "pois/ayuntamiento.jpg",
+    "camera": {
+      "position": [-67.2, 72.3, 346.9],
+      "target": [27.5, 35.9, 188.5]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    }
   },
   {
     "id": "polideportivo",
+    "tipo": "edificio",
     "name": "Polideportivo",
     "nameEn": "Sports center",
     "lat": 39.75226,
     "lon": -0.22835,
+    "node": "polideportivo",
+    "photo": "pois/polideportivo.jpg",
+    "camera": {
+      "position": [-281.1, 110.4, 263.7],
+      "target": [-340.5, 86.8, 204.4]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    },
     "note": "revisar — Pabelló Municipal d'Eports (hay 3 zonas deportivas)"
   },
-  { "id": "ies-almenara", "name": "IES Almenara", "nameEn": "IES Almenara", "lat": 39.75196, "lon": -0.23084 },
+  {
+    "id": "ies-almenara",
+    "tipo": "Instituto público",
+    "name": "IES Almenara",
+    "nameEn": "IES Almenara",
+    "lat": 39.75196,
+    "lon": -0.23084,
+    "node": "ies-almenara",
+    "photo": "pois/ies-almenara.jpg",
+    "camera": {
+      "position": [-521.4, 130.1, 349.5],
+      "target": [-626.2, 23.4, 73.3]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    }
+  },
   {
     "id": "estacion-tren",
+    "tipo": "edificio",
     "name": "Estación de tren",
     "nameEn": "Train station",
     "lat": 39.74876,
-    "lon": -0.21843
+    "lon": -0.21843,
+    "node": "estacion-tren",
+    "photo": "pois/estacion-tren.jpg",
+    "camera": {
+      "position": [268.8, 39.5, 594.9],
+      "target": [896.8, -111.7, 291.3]
+    },
+    "description": {
+      "es": "",
+      "en": ""
+    }
   }
 ]
