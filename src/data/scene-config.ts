@@ -88,7 +88,7 @@ export const LIGHTING = {
     near: 80,
     far: 330,
     // Distancia cámara -> DIORAMA_CENTER a partir de la cual se apaga.
-    autoDisableDistance: 600,
+    autoDisableDistance: 675,
     maxBokeh: 7,
     nearBlurMultiplier: 10.0,
     farBlurMultiplier: 1.7,
