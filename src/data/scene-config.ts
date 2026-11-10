@@ -85,7 +85,7 @@ export const LIGHTING = {
     updateAngleDeg: 1,
   },
   dof: {
-    near: 60,
+    near: 75,
     far: 330,
     // Histéresis: enciende por debajo de 670 y apaga por encima de 700.
     autoEnableDistance: 670,

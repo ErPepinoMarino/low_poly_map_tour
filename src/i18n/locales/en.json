@@ -6,6 +6,8 @@
   },
   "hud": {
     "language": "Language",
+    "linkedinProfile": "Joaquín Demarjal on LinkedIn",
+    "likeProject": "Do you like my project?",
     "smallScreenHint": "The experience is much better on a larger screen.",
     "dismissHint": "Dismiss notice",
     "nerdInfo": "Tech info",

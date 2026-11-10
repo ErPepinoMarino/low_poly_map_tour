@@ -6,6 +6,8 @@
   },
   "hud": {
     "language": "Idioma",
+    "linkedinProfile": "Perfil de LinkedIn de Joaquín Demarjal",
+    "likeProject": "¿Te gusta mi proyecto?",
     "smallScreenHint": "La experiencia es mucho mejor en una pantalla más grande.",
     "dismissHint": "Cerrar aviso",
     "nerdInfo": "Info técnica",

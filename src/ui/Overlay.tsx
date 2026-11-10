@@ -117,6 +117,14 @@ function MoonIcon() {
   );
 }
 
+function LinkedInIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4.98 3.5C4.98 4.88 3.86 6 2.48 6S0 4.88 0 3.5 1.12 1 2.48 1s2.5 1.12 2.5 2.5ZM.24 8.02h4.48V23H.24V8.02ZM8.02 8.02h4.3v2.05h.06c.6-1.14 2.06-2.34 4.24-2.34 4.54 0 5.38 2.99 5.38 6.88V23h-4.48v-6.65c0-1.59-.03-3.64-2.22-3.64-2.22 0-2.56 1.74-2.56 3.53V23H8.02V8.02Z" />
+    </svg>
+  );
+}
+
 function TimePanel() {
   const { t, i18n } = useTranslation();
   const language = useStore((state) => state.language);
@@ -240,6 +248,17 @@ export default function Overlay() {
     <div className={`hud${smallScreenHint.visible ? ' has-small-hint' : ''}`}>
       <div className="hud-clock-corner">
         <TimePanel />
+        <a
+          className="hud-linkedin"
+          href="https://www.linkedin.com/in/joaquin-demarjal/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label={t('hud.linkedinProfile')}
+          title={t('hud.linkedinProfile')}
+        >
+          <span>{t('hud.likeProject')}</span>
+          <LinkedInIcon />
+        </a>
       </div>
 
       <div className="hud-top-right">
