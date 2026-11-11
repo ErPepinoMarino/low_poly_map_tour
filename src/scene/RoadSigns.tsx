@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Billboard } from '@react-three/drei';
-import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
+import { useFrame, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { ROAD_EXITS, type RoadExit } from '../data/road-exits';
 import { useStore } from '../store/useStore';
@@ -59,13 +59,11 @@ function createSignTexture(text: string): THREE.CanvasTexture {
   return texture;
 }
 
-// Tamaño del orbe en píxeles, independiente de la distancia.
-const ORB_SCREEN_PX = 26;
-// El panel tiene escala propia: no crece con el orbe.
-const PANEL_SCREEN_WIDTH_PX = 120;
-const ORB_RADIUS = 7;
-const PANEL_WIDTH = 30;
-const PANEL_HEIGHT = 7.5;
+const ORB_RADIUS = 10;
+const ORB_HEIGHT = 12;
+const PANEL_WIDTH = 100;
+const PANEL_HEIGHT = 25;
+const PANEL_Y = ORB_HEIGHT + ORB_RADIUS + 8 + PANEL_HEIGHT / 2;
 const ORB_COLOR = '#ff7a14';
 const ORB_HOVER_COLOR = '#ffb24a';
 
@@ -73,13 +71,9 @@ function RoadOrb({ exit }: { exit: RoadExit }) {
   const language = useStore((state) => state.language);
   const [open, setOpen] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const signRef = useRef<THREE.Group>(null);
   const orbRef = useRef<THREE.Mesh>(null);
-  const hitboxRef = useRef<THREE.Mesh>(null);
   const panelRef = useRef<THREE.Group>(null);
-  const panelReveal = useRef(0.001);
-  const camera = useThree((state) => state.camera);
-  const viewport = useThree((state) => state.size);
+  const reveal = useRef(0.001);
   const label = language === 'en' ? exit.label.en : exit.label.es;
   const texture = useMemo(() => createSignTexture(label), [label]);
   const phase = useMemo(
@@ -97,39 +91,18 @@ function RoadOrb({ exit }: { exit: RoadExit }) {
 
   useFrame((state, delta) => {
     const time = state.clock.elapsedTime;
-    const distance = Math.max(
-      1,
-      camera.position.distanceTo(signRef.current?.position ?? camera.position),
-    );
-    const fov = camera instanceof THREE.PerspectiveCamera ? camera.fov : 45;
-    const visibleHeight = 2 * distance * Math.tan(THREE.MathUtils.degToRad(fov * 0.5));
-    const pixelsPerUnit = viewport.height / Math.max(1, visibleHeight);
-    const orbScale = ORB_SCREEN_PX / (ORB_RADIUS * 2) / Math.max(0.0001, pixelsPerUnit);
-    const panelScale =
-      Math.min(PANEL_SCREEN_WIDTH_PX, viewport.width * 0.8) /
-      PANEL_WIDTH /
-      Math.max(0.0001, pixelsPerUnit);
-    const orbRadiusWorld = ORB_RADIUS * orbScale;
-    const orbCenterY = orbRadiusWorld + 2 + Math.sin(time * 0.8 + phase) * 0.55 * orbScale;
-
     if (orbRef.current) {
-      orbRef.current.position.y = orbCenterY;
+      orbRef.current.position.y = ORB_HEIGHT + Math.sin(time * 0.8 + phase) * 0.55;
       orbRef.current.rotation.y += delta * 0.28;
       const pulse = 1 + Math.sin(time * 1.25 + phase) * 0.035;
-      orbRef.current.scale.setScalar(orbScale * pulse);
-    }
-
-    if (hitboxRef.current) {
-      hitboxRef.current.position.y = orbCenterY;
-      hitboxRef.current.scale.setScalar(orbScale);
+      orbRef.current.scale.setScalar(pulse);
     }
 
     if (panelRef.current) {
-      panelReveal.current = THREE.MathUtils.damp(panelReveal.current, open ? 1 : 0.001, 12, delta);
-      panelRef.current.scale.setScalar(panelScale * panelReveal.current);
-      panelRef.current.position.y =
-        orbCenterY + orbRadiusWorld + 2 + (PANEL_HEIGHT * panelScale) / 2;
-      panelRef.current.visible = panelReveal.current > 0.01;
+      reveal.current = THREE.MathUtils.damp(reveal.current, open ? 1 : 0.001, 12, delta);
+      panelRef.current.scale.setScalar(reveal.current);
+      panelRef.current.position.y = PANEL_Y + Math.sin(time * 0.8 + phase) * 0.35;
+      panelRef.current.visible = reveal.current > 0.01;
     }
   });
 
@@ -149,8 +122,8 @@ function RoadOrb({ exit }: { exit: RoadExit }) {
   };
 
   return (
-    <group ref={signRef} position={exit.position}>
-      <mesh ref={orbRef} position={[0, ORB_RADIUS, 0]}>
+    <group position={exit.position}>
+      <mesh ref={orbRef} position={[0, ORB_HEIGHT, 0]}>
         <icosahedronGeometry args={[ORB_RADIUS, 0]} />
         <meshStandardMaterial
           color={hovered || open ? ORB_HOVER_COLOR : ORB_COLOR}
@@ -159,34 +132,31 @@ function RoadOrb({ exit }: { exit: RoadExit }) {
           roughness={0.62}
           metalness={0.05}
           flatShading
-          fog={false}
         />
       </mesh>
 
-      {/* Zona de interacción más cómoda, sobre todo en móvil. */}
       <mesh
-        ref={hitboxRef}
-        position={[0, ORB_RADIUS, 0]}
+        position={[0, ORB_HEIGHT, 0]}
         onPointerOver={onPointerOver}
         onPointerOut={onPointerOut}
         onClick={onClick}
       >
-        <sphereGeometry args={[ORB_RADIUS * 1.9, 10, 10]} />
+        <sphereGeometry args={[ORB_RADIUS * 1.8, 10, 10]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
 
-      <group ref={panelRef} position={[0, 20, 0]} scale={0.001} visible={false}>
+      <group ref={panelRef} position={[0, PANEL_Y, 0]} scale={0.001} visible={false}>
         <Billboard>
-          <mesh renderOrder={999}>
+          <mesh>
             <planeGeometry args={[PANEL_WIDTH, PANEL_HEIGHT]} />
             <meshBasicMaterial
               map={texture}
               side={THREE.DoubleSide}
               transparent
-              toneMapped={false}
-              fog={false}
-              depthTest={false}
+              depthTest
               depthWrite={false}
+              toneMapped={false}
+              fog
             />
           </mesh>
         </Billboard>
