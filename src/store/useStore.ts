@@ -6,7 +6,7 @@ import { detectAppLanguage } from '../lib/appLanguage';
 export type UiState = 'free' | 'selected';
 export type LightMode = 'real' | 'day' | 'night' | 'manual';
 export type QualityTier = 'low' | 'high';
-export type EffectId = 'dof' | 'bloom' | 'vignette' | 'fog' | 'smaa' | 'shadows';
+export type EffectId = 'dof' | 'bloom' | 'vignette' | 'fog' | 'smaa' | 'shadows' | 'clouds';
 export type PoiNavigationSource = 'map' | 'panel' | 'next' | 'prev' | 'deep';
 
 export interface CameraFlightRequest {
@@ -65,6 +65,7 @@ interface AppState {
   showCameraGizmo: boolean;
   cameraInfo: CameraInfo | null;
   sceneStats: SceneStats | null;
+  fps: number;
   cameraResetRequest: number;
   performanceMode: boolean;
   qualityTier: QualityTier;
@@ -92,6 +93,7 @@ interface AppState {
   setShowCameraGizmo: (enabled: boolean) => void;
   setCameraInfo: (info: CameraInfo) => void;
   setSceneStats: (stats: SceneStats) => void;
+  setFps: (fps: number) => void;
   setPerformanceMode: (enabled: boolean) => void;
   setQualityTier: (tier: QualityTier) => void;
   openSign: (id: string) => void;
@@ -165,6 +167,7 @@ export const useStore = create<AppState>((set) => ({
     fog: true,
     smaa: true,
     shadows: true,
+    clouds: true,
   },
   dofNear: LIGHTING.dof.near,
   dofFar: LIGHTING.dof.far,
@@ -173,6 +176,7 @@ export const useStore = create<AppState>((set) => ({
   showCameraGizmo: false,
   cameraInfo: null,
   sceneStats: null,
+  fps: 0,
   cameraResetRequest: 0,
   performanceMode: false,
   qualityTier: isMobile ? 'low' : 'high',
@@ -240,6 +244,7 @@ export const useStore = create<AppState>((set) => ({
   setShowCameraGizmo: (showCameraGizmo) => set({ showCameraGizmo }),
   setCameraInfo: (cameraInfo) => set({ cameraInfo }),
   setSceneStats: (sceneStats) => set({ sceneStats }),
+  setFps: (fps) => set({ fps }),
   setPerformanceMode: (performanceMode) => set({ performanceMode }),
   setQualityTier: (qualityTier) => set({ qualityTier }),
   openSign: (id) => set({ openSignId: id }),

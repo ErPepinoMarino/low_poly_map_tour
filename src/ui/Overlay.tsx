@@ -10,6 +10,7 @@ const OPTIONS: Array<{ id: EffectId; label: string }> = [
   { id: 'bloom', label: 'hud.bloom' },
   { id: 'vignette', label: 'hud.vignette' },
   { id: 'fog', label: 'hud.fog' },
+  { id: 'clouds', label: 'hud.clouds' },
   { id: 'shadows', label: 'hud.shadows' },
   { id: 'smaa', label: 'hud.smaa' },
 ];
@@ -333,6 +334,7 @@ function NerdInfoPanel() {
   const { t, i18n } = useTranslation();
   const cameraInfo = useStore((state) => state.cameraInfo);
   const stats = useStore((state) => state.sceneStats);
+  const fps = useStore((state) => state.fps);
   const effects = useStore((state) => state.effects);
   const dofNear = useStore((state) => state.dofNear);
   const dofFar = useStore((state) => state.dofFar);
@@ -353,6 +355,11 @@ function NerdInfoPanel() {
     <section className="hud-menu-panel nerd-panel" aria-label={t('hud.nerdInfo')}>
       <div className="hud-menu-heading">
         <h2>{t('hud.nerdInfo')}</h2>
+      </div>
+
+      <div className="nerd-section">
+        <div className="nerd-section-title">{t('hud.fps')}</div>
+        <div className="hud-mono">{fps > 0 ? `${fps} FPS` : '—'}</div>
       </div>
 
       <div className="nerd-section">

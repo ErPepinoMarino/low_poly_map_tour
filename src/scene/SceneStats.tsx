@@ -53,8 +53,19 @@ export default function SceneStats() {
   const scene = useThree((state) => state.scene);
   const elapsed = useRef(0);
   const previous = useRef('');
+  const fpsFrames = useRef(0);
+  const fpsElapsed = useRef(0);
 
   useFrame((_, delta) => {
+    // FPS: media de un intervalo corto para que el HUD no parpadee.
+    fpsFrames.current += 1;
+    fpsElapsed.current += delta;
+    if (fpsElapsed.current >= 0.5) {
+      useStore.getState().setFps(Math.round(fpsFrames.current / fpsElapsed.current));
+      fpsFrames.current = 0;
+      fpsElapsed.current = 0;
+    }
+
     elapsed.current += delta;
     if (elapsed.current < 1) return;
     elapsed.current = 0;

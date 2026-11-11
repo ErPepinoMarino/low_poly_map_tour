@@ -26,6 +26,8 @@
     "bloom": "Bloom",
     "vignette": "Vignette",
     "fog": "Fog",
+    "clouds": "Clouds",
+    "fps": "FPS",
     "shadows": "Shadows",
     "shadowsNight": "Shadows are off at night",
     "smaa": "Antialiasing (SMAA)",
