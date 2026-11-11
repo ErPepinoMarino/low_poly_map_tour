@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useGLTF } from '@react-three/drei';
+import { useGLTF, useTexture } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { getTerrainHeightIndex } from '../lib/terrainHeight';
 import { useTimeOfDay } from '../lighting/useTimeOfDay';
 
 const TERRAIN_URL = `${import.meta.env.BASE_URL}models/terrain.glb`;
+const CLOUD_TEXTURE_URL = `${import.meta.env.BASE_URL}textures/nube.png`;
 const CLOUD_DAY_COLOR = new THREE.Color('#d8ecf1');
 const CLOUD_NIGHT_COLOR = new THREE.Color('#37455c');
 
@@ -25,8 +26,8 @@ const CLOUD_TUNING = {
   numMaxBig: 30,
   mediumFactor: 1.5,
   smallFactor: 2,
-  sizeMinBig: 120,
-  sizeMaxBig: 180,
+  sizeMinBig: 100,
+  sizeMaxBig: 150,
   sizeMinMedium: 70,
   sizeMaxMedium: 60,
   sizeMinSmall: 20,
@@ -36,7 +37,9 @@ const CLOUD_TUNING = {
   // Velocidad angular en radianes por segundo.
   orbitVelocityMin: 0.004,
   orbitVelocityMax: 0.01,
-  objectSpacing: 0.3,
+  objectSpacing: 0.5,
+  // Margen en metros desde la superficie del grupo donde empieza el fade.
+  nearFadeDistance: 150,
   // Desvío vertical máximo en metros, simétrico hacia arriba y abajo.
   verticalJitter: 20,
   spriteCoreStart: 0.2,
@@ -92,6 +95,10 @@ interface PlacedCloud {
 interface CloudOrbit {
   phase: number;
   speed: number;
+  x: number;
+  y: number;
+  z: number;
+  radius: number;
 }
 
 interface InstanceData {
@@ -101,6 +108,7 @@ interface InstanceData {
   orbitCenterZ: number;
   groupOf: Uint16Array;
   groups: CloudOrbit[];
+  groupFade: Float32Array;
   sizes: Float32Array;
   alphas: Float32Array;
   shades: Float32Array;
@@ -264,14 +272,18 @@ function createCloudGeometry(
 
   for (let groupIndex = 0; groupIndex < placed.length; groupIndex += 1) {
     const { spec, x, z, ground } = placed[groupIndex];
-    groups.push({
-      phase: random() * Math.PI * 2,
-      speed: randomRange(random, CLOUD_TUNING.orbitVelocityMin, CLOUD_TUNING.orbitVelocityMax),
-    });
     const y =
       ground +
       CLOUD_TUNING.heightMinGroup +
       random() * (CLOUD_TUNING.heightMaxGroup - CLOUD_TUNING.heightMinGroup);
+    groups.push({
+      phase: random() * Math.PI * 2,
+      speed: randomRange(random, CLOUD_TUNING.orbitVelocityMin, CLOUD_TUNING.orbitVelocityMax),
+      x,
+      y,
+      z,
+      radius: Math.max(1, spec.radius),
+    });
     const clusterRadius = Math.max(1, spec.radius);
     for (const puff of spec.puffs) {
       const q = Math.min(1, Math.hypot(puff.x, puff.z) / clusterRadius);
@@ -318,6 +330,7 @@ function createCloudGeometry(
     orbitCenterZ: centerZ,
     groupOf: new Uint16Array(groupOf),
     groups,
+    groupFade: new Float32Array(groups.length),
     sizes: baseSizes,
     alphas: baseAlphas,
     shades: baseShades,
@@ -346,9 +359,11 @@ const CLOUD_VERTEX_SHADER = /* glsl */ `
   varying float vShade;
   varying vec3 vWorld;
   varying vec2 vQuad;
+  varying vec2 vUv;
 
   void main() {
     vQuad = position.xy * 2.0;
+    vUv = uv;
     vAlpha = aAlpha;
     vShade = aShade;
 
@@ -363,55 +378,18 @@ const CLOUD_VERTEX_SHADER = /* glsl */ `
 const CLOUD_FRAGMENT_SHADER = /* glsl */ `
   uniform vec3 uColor;
   uniform float uOpacity;
-  uniform float uCoreStart;
-  uniform float uCoreEnd;
-  uniform float uHaloStrength;
+  uniform sampler2D uCloudTexture;
   uniform vec3 uFogColor;
   uniform float uFogDensity;
 
   varying float vAlpha;
   varying float vShade;
   varying vec3 vWorld;
-  varying vec2 vQuad;
-
-  float cloudHash(vec3 p) {
-    p = fract(p * 0.1031);
-    p += dot(p, p.yzx + 33.33);
-    return fract((p.x + p.y) * p.z);
-  }
-
-  float cloudNoise(vec3 p) {
-    vec3 i = floor(p);
-    vec3 f = fract(p);
-    f = f * f * (3.0 - 2.0 * f);
-    return mix(
-      mix(
-        mix(cloudHash(i), cloudHash(i + vec3(1, 0, 0)), f.x),
-        mix(cloudHash(i + vec3(0, 1, 0)), cloudHash(i + vec3(1, 1, 0)), f.x),
-        f.y
-      ),
-      mix(
-        mix(cloudHash(i + vec3(0, 0, 1)), cloudHash(i + vec3(1, 0, 1)), f.x),
-        mix(cloudHash(i + vec3(0, 1, 1)), cloudHash(i + vec3(1, 1, 1)), f.x),
-        f.y
-      ),
-      f.z
-    );
-  }
-
-  float cloudFbm(vec3 p) {
-    return cloudNoise(p) * 0.65 + cloudNoise(p * 2.07 + 17.0) * 0.35;
-  }
+  varying vec2 vUv;
 
   void main() {
-    float vapor = cloudFbm(vWorld * 0.05 + vec3(vQuad * 0.7, 0.0));
-    float radialDistance = length(vQuad) + (vapor - 0.5) * 0.2;
-    if (radialDistance > 1.0) discard;
-
-    float core = 1.0 - smoothstep(uCoreStart, uCoreEnd, radialDistance);
-    float halo = 1.0 - smoothstep(0.0, 0.95, radialDistance);
-    float shape = max(core, halo * uHaloStrength);
-    float alpha = vAlpha * shape * mix(0.65, 1.0, vapor) * uOpacity;
+    vec4 cloud = texture2D(uCloudTexture, vUv);
+    float alpha = vAlpha * cloud.a * uOpacity;
     if (alpha < 0.01) discard;
 
     vec3 toFragment = vWorld - cameraPosition;
@@ -432,9 +410,24 @@ export default function Clouds({ enabled = true }: { enabled?: boolean }) {
     () => createCloudGeometry(terrain, terrainBounds),
     [terrain, terrainBounds],
   );
+  const sourceCloudTexture = useTexture(CLOUD_TEXTURE_URL);
+  const cloudTexture = useMemo(() => {
+    const texture = sourceCloudTexture.clone();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.wrapS = THREE.ClampToEdgeWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    texture.generateMipmaps = true;
+    texture.needsUpdate = true;
+    return texture;
+  }, [sourceCloudTexture]);
   const time = useTimeOfDay();
   const [initialNightFactor] = useState(() => THREE.MathUtils.clamp(time.nightFactor, 0, 1));
   const targetColor = useMemo(() => new THREE.Color(), []);
+
+  useEffect(() => () => cloudTexture.dispose(), [cloudTexture]);
+
   const material = useMemo(() => {
     const initialColor = CLOUD_DAY_COLOR.clone().lerp(CLOUD_NIGHT_COLOR, initialNightFactor);
     return new THREE.ShaderMaterial({
@@ -445,16 +438,14 @@ export default function Clouds({ enabled = true }: { enabled?: boolean }) {
       uniforms: {
         uColor: { value: initialColor },
         uOpacity: { value: CLOUD_TUNING.opacity },
-        uCoreStart: { value: CLOUD_TUNING.spriteCoreStart },
-        uCoreEnd: { value: CLOUD_TUNING.spriteCoreEnd },
-        uHaloStrength: { value: CLOUD_TUNING.haloStrength },
+        uCloudTexture: { value: cloudTexture },
         uFogColor: { value: new THREE.Color('#b9d2de') },
         uFogDensity: { value: 0.00032 },
       },
       vertexShader: CLOUD_VERTEX_SHADER,
       fragmentShader: CLOUD_FRAGMENT_SHADER,
     });
-  }, [initialNightFactor]);
+  }, [cloudTexture, initialNightFactor]);
   const camera = useThree((state) => state.camera);
   const scene = useThree((state) => state.scene);
   const instanceRef = useRef<InstanceData | null>(null);
@@ -493,6 +484,7 @@ export default function Clouds({ enabled = true }: { enabled?: boolean }) {
       orbitCenterZ,
       groupOf,
       groups,
+      groupFade,
       sizes,
       alphas,
       shades,
@@ -502,6 +494,32 @@ export default function Clouds({ enabled = true }: { enabled?: boolean }) {
       sortedShades,
       order,
     } = instanceData;
+
+    // Culling suave por grupo: al acercarse, el grupo reduce tamaño y alpha
+    // hasta desaparecer, evitando que decenas de billboards llenen la pantalla.
+    for (let groupIndex = 0; groupIndex < groups.length; groupIndex += 1) {
+      const group = groups[groupIndex];
+      const theta = group.phase + state.clock.elapsedTime * group.speed;
+      const cosTheta = Math.cos(theta);
+      const sinTheta = Math.sin(theta);
+      const baseX = group.x - orbitCenterX;
+      const baseZ = group.z - orbitCenterZ;
+      const groupX = orbitCenterX + baseX * cosTheta - baseZ * sinTheta;
+      const groupZ = orbitCenterZ + baseX * sinTheta + baseZ * cosTheta;
+      const dx = camera.position.x - groupX;
+      const dy = camera.position.y - group.y;
+      const dz = camera.position.z - groupZ;
+      const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const fadeEnd = group.radius;
+      const fadeStart = fadeEnd + CLOUD_TUNING.nearFadeDistance;
+      const t = THREE.MathUtils.clamp(
+        (distance - fadeEnd) / Math.max(1, fadeStart - fadeEnd),
+        0,
+        1,
+      );
+      groupFade[groupIndex] = t * t * (3 - 2 * t);
+    }
+
     for (let i = 0; i < order.length; i += 1) {
       const group = groups[groupOf[i]];
       const theta = group.phase + state.clock.elapsedTime * group.speed;
@@ -527,11 +545,12 @@ export default function Clouds({ enabled = true }: { enabled?: boolean }) {
 
     for (let i = 0; i < order.length; i += 1) {
       const source = order[i];
+      const fade = groupFade[groupOf[source]];
       sortedCenters[i * 3] = centers[source * 3];
       sortedCenters[i * 3 + 1] = centers[source * 3 + 1];
       sortedCenters[i * 3 + 2] = centers[source * 3 + 2];
-      sortedSizes[i] = sizes[source];
-      sortedAlphas[i] = alphas[source];
+      sortedSizes[i] = sizes[source] * fade;
+      sortedAlphas[i] = alphas[source] * fade;
       sortedShades[i] = shades[source];
     }
 
