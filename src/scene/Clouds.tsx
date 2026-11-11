@@ -16,33 +16,33 @@ const CLOUD_NIGHT_COLOR = new THREE.Color('#37455c');
 //   >1 = separación creciente
 const CLOUD_TUNING = {
   numMinGroups: 3,
-  numMaxGroups: 7,
+  numMaxGroups: 8,
   spawnRadiusMin: 0.6,
   spawnRadiusMax: 0.9,
   // Margen exterior normalizado sobre el radio del terreno.
   spawnOuterMargin: 0,
-  numMinBig: 30,
-  numMaxBig: 120,
+  numMinBig: 15,
+  numMaxBig: 30,
   mediumFactor: 1.5,
   smallFactor: 2,
-  sizeMinBig: 60,
-  sizeMaxBig: 90,
-  sizeMinMedium: 40,
-  sizeMaxMedium: 30,
-  sizeMinSmall: 10,
-  sizeMaxSmall: 20,
+  sizeMinBig: 120,
+  sizeMaxBig: 180,
+  sizeMinMedium: 70,
+  sizeMaxMedium: 60,
+  sizeMinSmall: 20,
+  sizeMaxSmall: 30,
   heightMinGroup: 275,
   heightMaxGroup: 400,
   // Velocidad angular en radianes por segundo.
   orbitVelocityMin: 0.004,
   orbitVelocityMax: 0.01,
-  objectSpacing: 0.4,
+  objectSpacing: 0.3,
   // Desvío vertical máximo en metros, simétrico hacia arriba y abajo.
   verticalJitter: 20,
   spriteCoreStart: 0.2,
-  spriteCoreEnd: 1,
-  haloStrength: 1,
-  opacity: 0.05,
+  spriteCoreEnd: 0.6,
+  haloStrength: 0.1,
+  opacity: 0.15,
 };
 
 function mulberry32(seed: number) {
