@@ -1,0 +1,64 @@
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: grid;
+  place-items: center;
+  background: #0d1013;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 350ms ease,
+    transform 350ms ease;
+  pointer-events: auto;
+}
+
+.loading-screen.fading {
+  opacity: 0;
+  transform: scale(1.015);
+  pointer-events: none;
+}
+
+.loading-mark-wrap {
+  width: min(39vw, 340px);
+  padding: 20px;
+}
+
+.loading-mark {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 489 / 112;
+  overflow: hidden;
+  background: #272c31;
+  -webkit-mask-image: var(--loading-logo);
+  mask-image: var(--loading-logo);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.loading-mark-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--loading-progress, 0%);
+  background: linear-gradient(90deg, #b98222, #e0a23c);
+  box-shadow: 0 0 20px rgba(224, 162, 60, 0.25);
+  transition: width 80ms linear;
+}
+
+@media (max-width: 600px) {
+  .loading-mark-wrap {
+    width: min(43vw, 260px);
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-screen,
+  .loading-mark-fill {
+    transition-duration: 0ms;
+  }
+}

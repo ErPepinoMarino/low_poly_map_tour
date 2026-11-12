@@ -4,6 +4,9 @@
     "subtitle": "Interactive low-poly diorama",
     "brand": "Almenara · Interactive low-poly diorama"
   },
+  "loading": {
+    "label": "Loading Almenara"
+  },
   "hud": {
     "language": "Language",
     "linkedinProfile": "Joaquín Demarjal on LinkedIn",

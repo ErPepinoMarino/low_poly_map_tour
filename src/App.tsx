@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
@@ -12,6 +12,8 @@ import Effects from './scene/Effects';
 import SceneStats from './scene/SceneStats';
 import PhotoCapture from './scene/PhotoCapture';
 import Scene from './scene/Scene';
+import SceneReady from './scene/SceneReady';
+import LoadingScreen from './ui/LoadingScreen';
 import Overlay from './ui/Overlay';
 import PhotoPreview from './ui/PhotoPreview';
 import PoiPanel from './ui/PoiPanel';
@@ -22,6 +24,8 @@ export default function App() {
   const performanceMode = useStore((s) => s.performanceMode);
   const qualityTier = useStore((s) => s.qualityTier);
   const language = useStore((s) => s.language);
+  const [sceneReady, setSceneReady] = useState(false);
+  const [assetProgress, setAssetProgress] = useState(0);
   usePoiDeepLink();
 
   useEffect(() => {
@@ -63,10 +67,15 @@ export default function App() {
         <CameraTelemetry />
         <CameraGizmo />
         <SceneStats />
+        <SceneReady
+          onProgress={setAssetProgress}
+          onReady={() => setSceneReady(true)}
+        />
       </Canvas>
       <Overlay />
       <PoiPanel />
       <PhotoPreview />
+      <LoadingScreen progress={assetProgress} ready={sceneReady} />
     </>
   );
 }
