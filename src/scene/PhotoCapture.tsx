@@ -82,6 +82,8 @@ export default function PhotoCapture() {
             blob: watermarked,
             url: URL.createObjectURL(watermarked),
             fileName,
+            width: canvas.width,
+            height: canvas.height,
           });
         }),
       )

@@ -12,8 +12,8 @@
 
 .photo-card {
   display: flex;
-  width: min(920px, 100%);
-  max-height: calc(100vh - 40px);
+  max-width: calc(100vw - 40px);
+  max-height: calc(100dvh - 40px);
   flex-direction: column;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -75,8 +75,8 @@
 .photo-image {
   display: block;
   width: 100%;
+  height: auto;
   min-height: 0;
-  max-height: min(62vh, 680px);
   object-fit: contain;
   background: #0b0d0f;
 }
@@ -84,12 +84,17 @@
 .photo-actions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
   padding: 14px 20px 18px;
 }
 
 .photo-button {
+  display: inline-flex;
   min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   padding: 0 16px;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
@@ -98,6 +103,17 @@
   font: inherit;
   font-weight: 600;
   cursor: pointer;
+}
+
+.photo-share-icon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
 }
 
 .photo-button:hover {
@@ -124,15 +140,12 @@
   }
 
   .photo-card {
-    max-height: calc(100vh - 20px);
+    max-width: calc(100vw - 20px);
+    max-height: calc(100dvh - 20px);
   }
 
   .photo-card-header {
     padding: 14px 14px 10px;
-  }
-
-  .photo-image {
-    max-height: 56vh;
   }
 
   .photo-actions {

@@ -45,6 +45,8 @@ export interface PhotoShot {
   blob: Blob;
   url: string;
   fileName: string;
+  width: number;
+  height: number;
 }
 
 const isMobile =
