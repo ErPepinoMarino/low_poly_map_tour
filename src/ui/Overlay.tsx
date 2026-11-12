@@ -127,6 +127,23 @@ function NerdIcon() {
   );
 }
 
+function ClockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7v5l3.5 2" />
+    </svg>
+  );
+}
+
+function ClockCloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
+  );
+}
+
 function CameraIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -264,6 +281,9 @@ export default function Overlay() {
   const setPerformanceMode = useStore((state) => state.setPerformanceMode);
   const [infoOpen, setInfoOpen] = useState(false);
   const [optionsOpen, setOptionsOpen] = useState(false);
+  const smallScreen = useSmallScreen();
+  const [clockOpen, setClockOpen] = useState(() => !smallScreen);
+  const clockVisible = !smallScreen || clockOpen;
   const smallScreenHint = useSmallScreenHint();
 
   // Los menús solo se cierran con su interruptor o con Escape. No se cierran
@@ -281,24 +301,45 @@ export default function Overlay() {
   }, []);
 
   return (
-    <div className={`hud${smallScreenHint.visible ? ' has-small-hint' : ''}`}>
+    <div className={`hud${smallScreenHint.visible ? ' has-small-hint' : ''}${clockVisible ? ' clock-open' : ''}`}>
       <div className="hud-photo-corner">
         <PhotoButton />
       </div>
 
       <div className="hud-clock-corner">
-        <TimePanel />
-        <a
-          className="hud-linkedin"
-          href="https://www.linkedin.com/in/joaquin-demarjal/"
-          target="_blank"
-          rel="noreferrer"
-          aria-label={t('hud.linkedinProfile')}
-          title={t('hud.linkedinProfile')}
+        <button
+          type="button"
+          className={`hud-clock-toggle${clockVisible ? ' hud-clock-close' : ''}`}
+          aria-label={clockVisible ? t('hud.hideClock') : t('hud.showClock')}
+          title={clockVisible ? t('hud.hideClock') : t('hud.showClock')}
+          aria-expanded={clockVisible}
+          onClick={() => {
+            const next = !clockOpen;
+            setClockOpen(next);
+            if (next && smallScreen) {
+              setOptionsOpen(false);
+              setInfoOpen(false);
+            }
+          }}
         >
-          <span>{t('hud.likeProject')}</span>
-          <LinkedInIcon />
-        </a>
+          {clockVisible ? <ClockCloseIcon /> : <ClockIcon />}
+        </button>
+        {clockVisible ? (
+          <>
+            <TimePanel />
+            <a
+              className="hud-linkedin"
+              href="https://www.linkedin.com/in/joaquin-demarjal/"
+              target="_blank"
+              rel="noreferrer"
+              aria-label={t('hud.linkedinProfile')}
+              title={t('hud.linkedinProfile')}
+            >
+              <span>{t('hud.likeProject')}</span>
+              <LinkedInIcon />
+            </a>
+          </>
+        ) : null}
       </div>
 
       <div className="hud-top-right">
@@ -357,8 +398,10 @@ export default function Overlay() {
           title={t('hud.options')}
           aria-expanded={optionsOpen}
           onClick={() => {
-            setOptionsOpen((open) => !open);
+            const next = !optionsOpen;
+            setOptionsOpen(next);
             setInfoOpen(false);
+            if (next && smallScreen) setClockOpen(false);
           }}
         >
           <OptionsIcon />

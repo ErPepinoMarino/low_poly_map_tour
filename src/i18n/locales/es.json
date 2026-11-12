@@ -13,6 +13,8 @@
     "nerdInfo": "Info técnica",
     "options": "Opciones",
     "timePanel": "Hora y ciclo día/noche",
+    "showClock": "Mostrar reloj",
+    "hideClock": "Ocultar reloj",
     "now": "Ahora",
     "centerView": "Centrar vista",
     "simulateTime": "Simular hora",

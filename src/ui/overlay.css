@@ -26,8 +26,8 @@
 
 .hud-photo-corner {
   position: absolute;
-  top: 20px;
-  left: 20px;
+  right: 20px;
+  bottom: 20px;
   pointer-events: auto;
 }
 
@@ -74,6 +74,53 @@
   display: grid;
   justify-items: start;
   gap: 7px;
+}
+
+.hud-clock-toggle {
+  display: none;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(17, 19, 21, 0.62);
+  color: #f4eee4;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.hud-clock-toggle svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.hud-clock-toggle:hover,
+.hud-clock-toggle.open {
+  background: rgba(17, 19, 21, 0.82);
+}
+
+.hud-clock-close {
+  position: absolute;
+  top: -18px;
+  left: -5px;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+}
+
+.hud-clock-close svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 1.9;
 }
 
 .clock-town {
@@ -177,7 +224,12 @@
 }
 
 .hud-options {
-  bottom: 20px;
+  top: 20px;
+  right: auto;
+  bottom: auto;
+  left: 20px;
+  align-items: flex-start;
+  flex-direction: column-reverse;
 }
 
 .hud-menu-button {
@@ -260,6 +312,25 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   animation: menu-enter 140ms ease-out;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(213, 162, 70, 0.45) transparent;
+}
+
+.hud-menu-panel::-webkit-scrollbar {
+  width: 5px;
+}
+
+.hud-menu-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.hud-menu-panel::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(213, 162, 70, 0.38);
+}
+
+.hud-menu-panel::-webkit-scrollbar-thumb:hover {
+  background: rgba(213, 162, 70, 0.62);
 }
 
 .nerd-panel {
@@ -269,10 +340,9 @@
 }
 
 .options-panel {
-  position: absolute;
-  right: 0;
-  bottom: 48px;
+  position: static;
   max-height: min(72vh, 620px);
+  margin-top: 8px;
 }
 
 .hud-menu-heading {
@@ -469,11 +539,13 @@
 
 .hud-options {
   position: absolute;
-  right: 20px;
-  bottom: 20px;
+  top: 20px;
+  right: auto;
+  bottom: auto;
+  left: 20px;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: column-reverse;
+  align-items: flex-start;
   pointer-events: auto;
 }
 
@@ -598,12 +670,12 @@
   right: 0;
   z-index: 20;
   display: flex;
-  width: 62px;
-  height: 46px;
+  width: 48px;
+  height: 44px;
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 3px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-right: 0;
@@ -1124,5 +1196,126 @@
   .hud-menu-button .options-icon {
     width: 18px;
     height: 18px;
+  }
+}
+
+@media (max-width: 600px), (orientation: landscape) and (max-height: 600px) {
+  .hud-clock-toggle {
+    display: grid;
+  }
+
+  .hud-clock {
+    max-height: calc(100dvh - 72px);
+    overflow-y: auto;
+  }
+
+  .hud-photo-corner {
+    top: auto;
+    right: 10px;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+    left: auto;
+    transform: none;
+  }
+
+  .hud.has-small-hint .hud-photo-corner {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
+  }
+
+  .hud.clock-open .small-screen-hint {
+    display: none;
+  }
+
+  .hud.has-small-hint.clock-open .hud-clock-corner {
+    bottom: 10px;
+  }
+
+  .hud.has-small-hint.clock-open .hud-photo-corner {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+  }
+}
+
+@media (max-width: 600px), (orientation: landscape) and (max-height: 600px) {
+  .hud-options,
+  .hud.has-small-hint .hud-options {
+    top: 10px;
+    right: auto;
+    bottom: auto;
+    left: 10px;
+    align-items: flex-start;
+    flex-direction: column-reverse;
+  }
+
+  .options-panel {
+    position: static;
+    width: max-content;
+    max-width: min(50vw, 260px);
+    max-height: calc(100dvh - 170px);
+    margin-top: 8px;
+    padding: 12px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  .hud-clock-corner,
+  .hud.has-small-hint.clock-open .hud-clock-corner {
+    bottom: 8px;
+    left: 8px;
+    gap: 5px;
+  }
+
+  .hud-clock {
+    width: min(140px, 40vw);
+    max-height: calc(100dvh - 72px);
+    padding: 7px 8px;
+  }
+
+  .clock-town {
+    margin-bottom: 2px;
+    font-size: 21px;
+  }
+
+  .clock-time {
+    font-size: 22px;
+  }
+
+  .clock-date {
+    margin-top: 2px;
+    font-size: 11px;
+  }
+
+  .clock-modes {
+    margin-top: 6px;
+    gap: 3px;
+  }
+
+  .clock-icon-button {
+    width: 26px;
+    height: 26px;
+  }
+
+  .clock-now-button {
+    min-width: 50px;
+    height: 26px;
+    font-size: 10px;
+  }
+
+  .hud-slider {
+    gap: 4px;
+    margin-top: 5px;
+  }
+
+  .clock-center-view {
+    margin-top: 5px;
+    padding: 4px 7px;
+    font-size: 10px;
+  }
+
+  .clock-language-switch {
+    margin-top: 4px;
+  }
+
+  .hud-linkedin {
+    padding: 4px 8px;
+    font-size: 10px;
   }
 }
