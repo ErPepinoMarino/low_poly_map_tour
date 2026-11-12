@@ -172,6 +172,62 @@ function addWindowSeeds(geometry: THREE.BufferGeometry, object: THREE.Object3D):
   return sums.size;
 }
 
+// Las ventanas del tren son una excepción: no siguen el encendido aleatorio
+// del pueblo. De día conservan el cristal original; de noche se encienden
+// todas a la vez con un tono ligeramente más frío que la luz cálida del pueblo.
+export const TRAIN_WINDOW_NIGHT_COLOR = '#F4D1A0';
+
+function createTrainWindowMaterial(
+  original: THREE.Material,
+): THREE.MeshStandardMaterial {
+  const source = original as THREE.MeshStandardMaterial;
+  const material = new THREE.MeshStandardMaterial({
+    name: original.name,
+    color: source.color?.clone() ?? new THREE.Color('#2E3B40'),
+    roughness: 0.3,
+    metalness: 0.08,
+    emissive: new THREE.Color(TRAIN_WINDOW_NIGHT_COLOR),
+    emissiveIntensity: 2.1,
+    side: original.side,
+    flatShading: source.flatShading,
+    transparent: original.transparent,
+    opacity: original.opacity,
+    alphaTest: original.alphaTest,
+  });
+  material.userData.trainWindowGlass = true;
+
+  material.onBeforeCompile = (shader) => {
+    shader.uniforms.uWindowNight = uniforms.uWindowNight;
+    shader.fragmentShader = shader.fragmentShader
+      .replace(
+        '#include <common>',
+        '#include <common>\nuniform float uWindowNight;',
+      )
+      .replace(
+        '#include <emissivemap_fragment>',
+        '#include <emissivemap_fragment>\n        totalEmissiveRadiance *= uWindowNight;',
+      );
+  };
+  material.customProgramCacheKey = () => 'train-window-v1';
+  material.needsUpdate = true;
+  return material;
+}
+
+export function setupTrainWindowMaterials(scene: THREE.Object3D) {
+  scene.traverse((obj) => {
+    const mesh = obj as THREE.Mesh;
+    if (!mesh.isMesh) return;
+
+    const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+    const next = materials.map((material) => {
+      if (material.userData.trainWindowGlass) return material;
+      if (normalizeName(material.name) !== 'ventanatren') return material;
+      return createTrainWindowMaterial(material);
+    });
+    mesh.material = Array.isArray(mesh.material) ? next : next[0];
+  });
+}
+
 function createWindowMaterial(original: THREE.Material): THREE.MeshStandardMaterial {
   const source = original as THREE.MeshStandardMaterial;
   const material = new THREE.MeshStandardMaterial({

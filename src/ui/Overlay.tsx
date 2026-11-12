@@ -118,6 +118,32 @@ function MoonIcon() {
   );
 }
 
+function CameraIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M4 7.5h3.1l1.2-2h7.4l1.2 2H20a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 20 19.5H4A1.5 1.5 0 0 1 2.5 18V9A1.5 1.5 0 0 1 4 7.5Z" />
+      <circle cx="12" cy="13" r="3.2" />
+    </svg>
+  );
+}
+
+function PhotoButton() {
+  const { t } = useTranslation();
+  const requestPhoto = useStore((state) => state.requestPhoto);
+
+  return (
+    <button
+      type="button"
+      className="hud-photo-button"
+      title={t('photo.button')}
+      aria-label={t('photo.button')}
+      onClick={requestPhoto}
+    >
+      <CameraIcon />
+    </button>
+  );
+}
+
 function LinkedInIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -247,6 +273,10 @@ export default function Overlay() {
 
   return (
     <div className={`hud${smallScreenHint.visible ? ' has-small-hint' : ''}`}>
+      <div className="hud-photo-corner">
+        <PhotoButton />
+      </div>
+
       <div className="hud-clock-corner">
         <TimePanel />
         <a

@@ -24,6 +24,49 @@
   pointer-events: auto;
 }
 
+.hud-photo-corner {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  pointer-events: auto;
+}
+
+.hud-photo-button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(17, 19, 21, 0.62);
+  color: #f4eee4;
+  cursor: pointer;
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(14px) saturate(115%);
+  -webkit-backdrop-filter: blur(14px) saturate(115%);
+  transition:
+    background 140ms ease,
+    border-color 140ms ease,
+    transform 140ms ease;
+}
+
+.hud-photo-button svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.7;
+}
+
+.hud-photo-button:hover {
+  border-color: rgba(213, 162, 70, 0.48);
+  background: rgba(17, 19, 21, 0.82);
+  transform: translateY(-1px);
+}
+
 .hud-clock-corner {
   position: absolute;
   bottom: 20px;

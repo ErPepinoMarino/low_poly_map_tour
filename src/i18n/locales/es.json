@@ -73,6 +73,17 @@
     "photoAlt": "Foto de {{name}}",
     "photoPending": "Foto pendiente"
   },
+  "photo": {
+    "button": "Hacer foto",
+    "title": "¡<strong>Guarda</strong> o <strong>comparte</strong> la foto con quien quieras! ;)",
+    "titleAria": "¡Guarda o comparte la foto con quien quieras! ;)",
+    "alt": "Foto del diorama de Almenara",
+    "share": "Compartir",
+    "download": "Descargar PNG",
+    "close": "Cerrar",
+    "shareTitle": "Almenara · Mapa 3D",
+    "shareText": "Un rincón de Almenara en 3D."
+  },
   "error": {
     "title": "Algo ha fallado",
     "body": "La escena no ha podido cargarse. Abre la consola del navegador (F12) para ver el detalle.",

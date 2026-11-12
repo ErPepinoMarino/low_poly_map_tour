@@ -1,4 +1,5 @@
 import { useStore } from '../store/useStore';
+import Birds from './Birds';
 import Clouds from './Clouds';
 import Houses from './Houses';
 import RoadSigns from './RoadSigns';
@@ -34,6 +35,7 @@ export default function Scene() {
       <NightSky />
       <Clouds enabled={cloudsEnabled} />
       <Terrain />
+      <Birds />
       <Streets />
       <Tracks />
       <RoadSigns />

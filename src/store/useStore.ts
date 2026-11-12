@@ -41,6 +41,12 @@ export interface SceneStats {
   drawCalls: number;
 }
 
+export interface PhotoShot {
+  blob: Blob;
+  url: string;
+  fileName: string;
+}
+
 const isMobile =
   typeof window !== 'undefined' &&
   (window.matchMedia('(max-width: 768px)').matches ||
@@ -71,6 +77,8 @@ interface AppState {
   qualityTier: QualityTier;
   openSignId: string | null;
   extras: Record<string, boolean>;
+  photoRequest: number;
+  photo: PhotoShot | null;
   selectPoi: (id: string) => void;
   setHoveredPoiId: (id: string | null) => void;
   navigateToPoi: (id: string, source?: PoiNavigationSource) => void;
@@ -100,6 +108,9 @@ interface AppState {
   closeSign: () => void;
   resetCamera: () => void;
   setExtra: (id: string, enabled: boolean) => void;
+  requestPhoto: () => void;
+  setPhoto: (photo: PhotoShot) => void;
+  clearPhoto: () => void;
 }
 
 // Valor inicial del request; PoiCamera lo sustituye por la duración calculada
@@ -182,6 +193,8 @@ export const useStore = create<AppState>((set) => ({
   qualityTier: isMobile ? 'low' : 'high',
   openSignId: null,
   extras: {},
+  photoRequest: 0,
+  photo: null,
   selectPoi: (id) => set((s) => navigationState(s, id, 'deep')),
   setHoveredPoiId: (hoveredPoiId) => set({ hoveredPoiId }),
   navigateToPoi: (id, source = 'panel') => set((s) => navigationState(s, id, source)),
@@ -255,4 +268,15 @@ export const useStore = create<AppState>((set) => ({
       cameraFlightRequest: null,
     })),
   setExtra: (id, enabled) => set((s) => ({ extras: { ...s.extras, [id]: enabled } })),
+  requestPhoto: () => set((s) => ({ photoRequest: s.photoRequest + 1 })),
+  setPhoto: (photo) =>
+    set((s) => {
+      if (s.photo) URL.revokeObjectURL(s.photo.url);
+      return { photo };
+    }),
+  clearPhoto: () =>
+    set((s) => {
+      if (s.photo) URL.revokeObjectURL(s.photo.url);
+      return { photo: null };
+    }),
 }));

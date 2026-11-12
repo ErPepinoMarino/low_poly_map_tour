@@ -10,8 +10,10 @@ import CameraSafetyBounds from './scene/CameraSafetyBounds';
 import CameraReset from './scene/CameraReset';
 import Effects from './scene/Effects';
 import SceneStats from './scene/SceneStats';
+import PhotoCapture from './scene/PhotoCapture';
 import Scene from './scene/Scene';
 import Overlay from './ui/Overlay';
+import PhotoPreview from './ui/PhotoPreview';
 import PoiPanel from './ui/PoiPanel';
 import { usePoiDeepLink } from './router/usePoiDeepLink';
 import { useStore } from './store/useStore';
@@ -36,6 +38,7 @@ export default function App() {
       <Canvas
         camera={{ position: DEFAULT_VIEW.position, fov: 45, near: 1, far: 20000 }}
         dpr={dpr}
+        gl={{ preserveDrawingBuffer: true }}
         shadows="percentage"
         onCreated={({ gl }) => {
           gl.toneMapping = THREE.AgXToneMapping;
@@ -44,6 +47,7 @@ export default function App() {
       >
         <Scene />
         <Effects />
+        <PhotoCapture />
         <OrbitControls
           makeDefault
           enableDamping
@@ -62,6 +66,7 @@ export default function App() {
       </Canvas>
       <Overlay />
       <PoiPanel />
+      <PhotoPreview />
     </>
   );
 }

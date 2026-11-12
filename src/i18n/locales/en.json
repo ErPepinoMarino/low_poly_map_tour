@@ -73,6 +73,17 @@
     "photoAlt": "Photo of {{name}}",
     "photoPending": "Photo pending"
   },
+  "photo": {
+    "button": "Take photo",
+    "title": "<strong>Save</strong> or <strong>share</strong> the photo with whoever you want! ;)",
+    "titleAria": "Save or share the photo with whoever you want! ;)",
+    "alt": "Photo of the Almenara diorama",
+    "share": "Share",
+    "download": "Download PNG",
+    "close": "Close",
+    "shareTitle": "Almenara · 3D Map",
+    "shareText": "A little corner of Almenara in 3D."
+  },
   "error": {
     "title": "Something went wrong",
     "body": "The scene could not load. Open the browser console (F12) for details.",

@@ -3,6 +3,7 @@ import { useGLTF } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { setupNamedMaterials } from '../lib/materials';
+import { setupTrainWindowMaterials } from '../lib/windowMaterials';
 import { TRAIN_ROUTE } from '../data/train-route';
 
 const LOCOMOTIVE_URL = `${import.meta.env.BASE_URL}models/locomotora.glb`;
@@ -178,6 +179,7 @@ export default function Train({
     // untouched (scaling the cars would separate the couplings).
     for (const car of cars) {
       setupNamedMaterials(car);
+      setupTrainWindowMaterials(car);
       car.traverse((object) => {
         const mesh = object as THREE.Mesh;
         if (!mesh.isMesh) return;

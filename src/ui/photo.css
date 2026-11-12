@@ -1,0 +1,141 @@
+.photo-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(8, 10, 12, 0.78);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.photo-card {
+  display: flex;
+  width: min(920px, 100%);
+  max-height: calc(100vh - 40px);
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  background: #15171a;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  color: #f4eee4;
+}
+
+.photo-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px 14px;
+}
+
+.photo-card-title {
+  max-width: 720px;
+  padding-top: 3px;
+  color: rgba(244, 238, 228, 0.9);
+  font-size: 21px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.photo-card-title strong {
+  font-weight: 700;
+}
+
+.photo-close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  cursor: pointer;
+}
+
+.photo-close svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-width: 1.8;
+}
+
+.photo-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.photo-image {
+  display: block;
+  width: 100%;
+  min-height: 0;
+  max-height: min(62vh, 680px);
+  object-fit: contain;
+  background: #0b0d0f;
+}
+
+.photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 20px 18px;
+}
+
+.photo-button {
+  min-height: 38px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #f4eee4;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.photo-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.photo-button-primary {
+  border-color: rgba(213, 162, 70, 0.5);
+  background: #b98222;
+  color: #17120a;
+}
+
+.photo-button-primary:hover {
+  background: #cf9833;
+}
+
+.photo-button-muted {
+  color: rgba(244, 238, 228, 0.64);
+}
+
+@media (max-width: 600px) {
+  .photo-overlay {
+    padding: 10px;
+  }
+
+  .photo-card {
+    max-height: calc(100vh - 20px);
+  }
+
+  .photo-card-header {
+    padding: 14px 14px 10px;
+  }
+
+  .photo-image {
+    max-height: 56vh;
+  }
+
+  .photo-actions {
+    padding: 12px 14px 14px;
+  }
+}
