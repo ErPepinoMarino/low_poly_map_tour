@@ -13,7 +13,7 @@
 
 ## Español
 
-Este proyecto solo tiene un objetivo, y es tremendamente simple: **trastear con Three.js y descubrir si era capaz de montar una escena 3D con +50k polígonos, DOF, una UI, sombras, bloom y antialiasing, y conseguir que la escena fuera fluida hasta en mi smartphone (que es malo)**.
+Este proyecto solo tiene un objetivo, y es tremendamente simple: **trastear con Three.js y descubrir si era capaz de montar una escena 3D con +60k polígonos, DOF, una UI, sombras, bloom y antialiasing, y conseguir que la escena fuera fluida hasta en mi smartphone (que es malo)**.
 
 El resultado es un diorama low-poly de **Almenara (Castellón), España** que podría funcionar como mapa turístico interactivo. No obstante, visto el resultado, puede adaptarse fácilmente a muchos otros tipos de proyecto: ferias, parques de atracciones, presentaciones inmobiliarias, museos... Básicamente, cualquier experiencia que necesite un mapa 3D navegable con puntos de interés.
 
@@ -134,7 +134,7 @@ La aplicación se publica en GitHub Pages. Cada push a `main` ejecuta lint, buil
 
 [Español](#español) · **English**
 
-This project has only one goal, and it is extremely simple: **to tinker with Three.js and find out whether I could build a 3D scene with 50k+ polygons, DOF, a UI, shadows, bloom and antialiasing, and keep it smooth even on my smartphone (which is bad)**.
+This project has only one goal, and it is extremely simple: **to tinker with Three.js and find out whether I could build a 3D scene with 60k+ polygons, DOF, a UI, shadows, bloom and antialiasing, and keep it smooth even on my smartphone (which is bad)**.
 
 The result is a low-poly diorama of **Almenara (Castellón), Spain** that could work as an interactive tourist map. However, given the result, it can easily be adapted to many other types of project: fairs, theme parks, real-estate presentations, museums... Basically, any experience that needs a navigable 3D map with points of interest.
 
