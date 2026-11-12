@@ -2,7 +2,10 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import './loading.css';
 
-const LOGO_URL = `${import.meta.env.BASE_URL}textures/logoAlmenaraSvg.svg`;
+const LOGO_URL = new URL(
+  `${import.meta.env.BASE_URL}textures/logoAlmenaraSvg.svg`,
+  window.location.href,
+).href;
 const MIN_VISIBLE_MS = 800;
 const HOLD_AFTER_READY_MS = 250;
 const FADE_OUT_MS = 350;
