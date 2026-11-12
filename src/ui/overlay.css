@@ -234,6 +234,17 @@
   transform: translateX(11px);
 }
 
+.hud-info-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
 .options-icon {
   width: 16px;
   height: 16px;
@@ -1058,5 +1069,60 @@
   }
   .hud-clock {
     max-width: calc(100vw - 20px);
+  }
+}
+
+@media (max-width: 600px) and (orientation: portrait) {
+  .hud-clock {
+    width: 140px;
+    max-width: 50vw;
+    padding: 9px;
+  }
+
+  .clock-town {
+    margin-bottom: 3px;
+  }
+
+  .hud-slider {
+    margin-top: 8px;
+  }
+
+  .clock-modes {
+    gap: 4px;
+  }
+
+  .clock-icon-button {
+    width: 28px;
+  }
+
+  .clock-now-button {
+    min-width: 52px;
+    padding: 0 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hud-menu-label,
+  .hud-menu-button .menu-switch {
+    display: none;
+  }
+
+  .hud-menu-button {
+    width: 38px;
+    min-height: 38px;
+    gap: 0;
+    padding: 0;
+    border-radius: 50%;
+  }
+
+  .hud-info-icon {
+    display: block;
+    width: 18px;
+    height: 18px;
+  }
+
+  .hud-menu-button .options-icon {
+    width: 18px;
+    height: 18px;
   }
 }

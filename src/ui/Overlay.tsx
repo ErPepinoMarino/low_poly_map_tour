@@ -118,6 +118,15 @@ function MoonIcon() {
   );
 }
 
+function NerdIcon() {
+  return (
+    <svg className="hud-info-icon" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="10.5" cy="10.5" r="6.5" />
+      <path d="m15.5 15.5 5 5" />
+    </svg>
+  );
+}
+
 function CameraIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -296,13 +305,16 @@ export default function Overlay() {
         <button
           type="button"
           className={`hud-menu-button${infoOpen ? ' open' : ''}`}
+          aria-label={t('hud.nerdInfo')}
+          title={t('hud.nerdInfo')}
           aria-expanded={infoOpen}
           onClick={() => {
             setInfoOpen((open) => !open);
             setOptionsOpen(false);
           }}
         >
-          <span>{t('hud.nerdInfo')}</span>
+          <NerdIcon />
+          <span className="hud-menu-label">{t('hud.nerdInfo')}</span>
           <span className={`menu-switch${infoOpen ? ' on' : ''}`} aria-hidden="true">
             <i />
           </span>
@@ -341,6 +353,8 @@ export default function Overlay() {
         <button
           type="button"
           className={`hud-menu-button${optionsOpen ? ' open' : ''}`}
+          aria-label={t('hud.options')}
+          title={t('hud.options')}
           aria-expanded={optionsOpen}
           onClick={() => {
             setOptionsOpen((open) => !open);
@@ -348,7 +362,7 @@ export default function Overlay() {
           }}
         >
           <OptionsIcon />
-          <span>{t('hud.options')}</span>
+          <span className="hud-menu-label">{t('hud.options')}</span>
           <span className={`menu-switch${optionsOpen ? ' on' : ''}`} aria-hidden="true">
             <i />
           </span>
