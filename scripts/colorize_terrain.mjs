@@ -67,6 +67,36 @@ for (let i = 0; i < positions.length; i += 3) {
 const srgbToLinear = (value) =>
   value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
 
+const linear = ([r, g, b]) => [
+  srgbToLinear(r),
+  srgbToLinear(g),
+  srgbToLinear(b),
+];
+const mix = (a, b, t) => [
+  a[0] + (b[0] - a[0]) * t,
+  a[1] + (b[1] - a[1]) * t,
+  a[2] + (b[2] - a[2]) * t,
+];
+const clamp01 = (value) => Math.max(0, Math.min(1, value));
+const smoothstep = (edge0, edge1, value) => {
+  const t = clamp01((value - edge0) / (edge1 - edge0));
+  return t * t * (3 - 2 * t);
+};
+const terrainNoise = (x, z) =>
+  Math.sin(x * 0.021 + Math.sin(z * 0.017) * 1.8) * 0.5 +
+  Math.sin(z * 0.037 + x * 0.013) * 0.3 +
+  Math.sin((x + z) * 0.009) * 0.2;
+
+// La montaña del castillo necesita una segunda lectura: falda verde, laderas
+// mixtas y estratos de roca. Se hornea en los vertex colors para no añadir
+// coste de render ni otra textura.
+const GREEN_LOW = linear([0.47, 0.52, 0.3]);
+const GREEN_MID = linear([0.6, 0.63, 0.39]);
+const GREEN_DRY = linear([0.68, 0.64, 0.44]);
+const ROCK_DARK = linear([0.4, 0.32, 0.24]);
+const ROCK_MID = linear([0.58, 0.43, 0.3]);
+const ROCK_LIGHT = linear([0.7, 0.55, 0.39]);
+
 // 3. Rasterizar cobertura + difuminar.
 const landcover = await loadLandcover(LANDCOVER);
 const grid = new Float32Array(GRID * GRID * 3);
@@ -108,6 +138,50 @@ for (let i = 0; i < vertexCount; i++) {
   }
   uvs[i * 2] = x / NOISE_TILE;
   uvs[i * 2 + 1] = z / NOISE_TILE;
+}
+
+// 4b. Segunda lectura de la montaña: falda verde, laderas mixtas y estratos.
+// Se aplica solo a partir de cierta altura y pendiente para no teñir huertas,
+// calles ni el casco urbano.
+for (let i = 0; i < vertexCount; i++) {
+  const x = positions[i * 3];
+  const y = positions[i * 3 + 1];
+  const z = positions[i * 3 + 2];
+  if (y < 45) continue;
+
+  const slope = hasNormals ? 1 - clamp01(normals[i * 3 + 1]) : 0;
+  const heightLow = smoothstep(45, 85, y);
+  const heightHigh = smoothstep(70, 135, y);
+  const slopeMask = smoothstep(0.12, 0.48, slope);
+  const mountainMask = clamp01(heightLow * (0.65 + 0.35 * slopeMask));
+  if (mountainMask < 0.01) continue;
+
+  const noise = terrainNoise(x, z);
+  const band = 0.5 + 0.5 * Math.sin(y * 0.26 + noise * 1.8 + x * 0.006);
+  const bandMask = smoothstep(0.15, 0.85, band);
+  const green = mix(GREEN_LOW, GREEN_MID, clamp01(noise * 0.5 + 0.5));
+  const greenDry = mix(green, GREEN_DRY, smoothstep(65, 120, y) * 0.5);
+  const rock = mix(
+    ROCK_DARK,
+    ROCK_MID,
+    clamp01(0.15 + bandMask * 0.75 + noise * 0.05),
+  );
+  const rockColor = mix(rock, ROCK_LIGHT, smoothstep(0.5, 0.9, band) * 0.65);
+  const outcrop =
+    smoothstep(0.18, 0.55, slope) *
+    smoothstep(55, 110, y) *
+    smoothstep(-0.2, 0.5, noise) *
+    0.45;
+  const rockMask = clamp01(
+    heightHigh * (0.55 + 0.45 * slopeMask) +
+      smoothstep(0.32, 0.62, slope) * smoothstep(55, 120, y) * 0.35 +
+      outcrop,
+  );
+  const target = mix(greenDry, rockColor, rockMask);
+  for (let channel = 0; channel < 3; channel += 1) {
+    const base = colors[i * 3 + channel];
+    colors[i * 3 + channel] = base + (target[channel] - base) * mountainMask;
+  }
 }
 
 // 5. Escribir GLB nuevo (POSITION + NORMAL + COLOR_0 + TEXCOORD_0 + índices).
